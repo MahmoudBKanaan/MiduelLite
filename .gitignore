@@ -1,5 +1,9 @@
 # Dependencies
 node_modules/
+package-lock.json
+# Root tooling only (optional screenshot script); app packages live in frontend/backend
+/package.json
+/package-lock.json
 
 # Environment secrets (use .env.example only)
 .env

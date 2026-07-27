@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>198 — Docker containers running</title>
+<style>
+  body { margin:0; font-family: Consolas, 'Courier New', monospace; background:#0f1419; color:#e8eef7; }
+  header { padding:16px 20px; background:#1a2332; border-bottom:1px solid #334155; font-size:18px; font-weight:700; }
+  pre { padding:20px; white-space:pre-wrap; word-break:break-word; font-size:13px; line-height:1.4; margin:0; }
+</style></head>
+<body>
+<header>198 — Docker containers running</header>
+<pre>NAME                     IMAGE                  COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+minduellite-backend-1    minduellite-backend    "docker-entrypoint.s…"   backend    3 minutes ago   Up 3 minutes             0.0.0.0:3001->3001/tcp, [::]:3001->3001/tcp
+minduellite-database-1   postgres:16-alpine     "docker-entrypoint.s…"   database   3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+minduellite-frontend-1   minduellite-frontend   "docker-entrypoint.s…"   frontend   3 minutes ago   Up 3 minutes             0.0.0.0:5173->5173/tcp, [::]:5173->5173/tcp
+</pre>
+</body></html>

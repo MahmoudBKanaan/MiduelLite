@@ -14,3 +14,6 @@
 | [tutor-concept-submission.md](./tutor-concept-submission.md) | Tutor approval package |
 
 Project root: repository folder containing `docker-compose.yml` and `README.md`.
+
+| [screenshots/](./screenshots/README.md) | Presentation screenshots (192–198) |
+

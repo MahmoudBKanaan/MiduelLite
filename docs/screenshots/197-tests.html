@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<title>197 — Successful automated tests</title>
+<style>
+  body { margin:0; font-family: Consolas, 'Courier New', monospace; background:#0f1419; color:#e8eef7; }
+  header { padding:16px 20px; background:#1a2332; border-bottom:1px solid #334155; font-size:18px; font-weight:700; }
+  pre { padding:20px; white-space:pre-wrap; word-break:break-word; font-size:13px; line-height:1.4; margin:0; }
+</style></head>
+<body>
+<header>197 — Successful automated tests</header>
+<pre>
+> minduel-lite-frontend@1.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 D:/Documents/IU/MinduelLite/frontend
+
+ ✓ tests/PoolPage.test.jsx (4 tests) 353ms
+ ✓ tests/MatchPage.test.jsx (7 tests) 533ms
+ ✓ tests/WelcomePage.test.jsx (4 tests) 1380ms
+   ✓ WelcomePage (items 77–85) > FT-02 Enter Pool disabled until valid name, avatar, 3 interests 490ms
+   ✓ WelcomePage (items 77–85) > Enter Pool POSTs player, saves session, navigates /pool 476ms
+ ✓ tests/session.test.js (8 tests) 13ms
+ ✓ tests/ResultPage.test.jsx (4 tests) 441ms
+ ✓ tests/api.test.js (4 tests) 6ms
+
+ Test Files  6 passed (6)
+      Tests  31 passed (31)
+   Start at  18:21:49
+   Duration  7.11s (transform 296ms, setup 1.99s, collect 2.40s, tests 2.73s, environment 10.31s, prepare 1.30s)
+
+
+
+--- BACKEND ---
+
+
+> minduel-lite-backend@1.0.0 test
+> vitest run
+
+
+ RUN  v2.1.9 D:/Documents/IU/MinduelLite/backend
+
+ ✓ tests/core-mvp.test.js (17 tests) 930ms
+ ✓ tests/api.test.js (10 tests) 776ms
+   ✓ Player and matchmaking (DB) > BT-10/11 flagging and third flag ends match 316ms
+ ✓ tests/review.test.js (10 tests) 937ms
+ ✓ tests/result.test.js (9 tests) 418ms
+   ✓ GET /api/matches/:matchId/result (items 68–69) > returns result payload after THREE_FLAGS end 411ms
+ ✓ tests/matchmaking.test.js (13 tests) 270ms
+ ✓ tests/match-engine.test.js (9 tests) 426ms
+ ✓ tests/security.test.js (11 tests) 91ms
+ ✓ tests/players.test.js (12 tests) 125ms
+ ✓ tests/foundation.test.js (3 tests) 45ms
+
+ Test Files  9 passed (9)
+      Tests  94 passed (94)
+   Start at  18:21:58
+   Duration  11.42s (transform 144ms, setup 0ms, collect 4.12s, tests 4.02s, environment 3ms, prepare 1.32s)
+
+</pre>
+</body></html>
