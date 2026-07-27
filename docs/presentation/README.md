@@ -4,7 +4,10 @@
 
 | File | Description |
 |------|-------------|
-| **[MinduelLite-Oral-Project-Report.pptx](./MinduelLite-Oral-Project-Report.pptx)** | Full oral report (~17 slides, ~15 min) |
+| **[MinduelLite-Oral-Project-Report.pptx](./MinduelLite-Oral-Project-Report.pptx)** | Full oral report (PowerPoint) |
+| **[MinduelLite-Oral-Project-Report.pdf](./MinduelLite-Oral-Project-Report.pdf)** | Final PDF for IU submission (item 218) |
+| [speaking-plan-15min.md](./speaking-plan-15min.md) | Timed ~15-minute speaking plan (item 212) |
+| [critical-evaluation.md](./critical-evaluation.md) | Goal / evidence / limitations |
 | [build-presentation.mjs](./build-presentation.mjs) | Regenerates the PPTX |
 
 **Rebuild:** from repo root, with `pptxgenjs` available:  
