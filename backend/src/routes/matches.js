@@ -10,6 +10,10 @@ import {
 
 const router = Router();
 
+/**
+ * GET /api/matches/:matchId
+ * Player-facing match state (names, role, question, phase, answers/scores, flags).
+ */
 router.get('/:matchId', requireSession, async (req, res, next) => {
   try {
     const state = await getMatchState(req.params.matchId, req.player.id);
@@ -19,6 +23,10 @@ router.get('/:matchId', requireSession, async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/matches/:matchId/answer
+ * Body: { "answer": "..." }
+ */
 router.post('/:matchId/answer', requireSession, async (req, res, next) => {
   try {
     const state = await submitAnswer(
@@ -32,6 +40,10 @@ router.post('/:matchId/answer', requireSession, async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/matches/:matchId/score
+ * Body: { "score": 1..10 }
+ */
 router.post('/:matchId/score', requireSession, async (req, res, next) => {
   try {
     const state = await submitScore(
@@ -45,12 +57,18 @@ router.post('/:matchId/score', requireSession, async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/matches/:matchId/review
+ * Body: { "flag": false } = ACCEPT, { "flag": true } = FLAG
+ *    or { "action": "ACCEPT" | "FLAG" }
+ * Player reviews only their own received score; decision is immutable.
+ */
 router.post('/:matchId/review', requireSession, async (req, res, next) => {
   try {
     const state = await submitReview(
       req.params.matchId,
       req.player.id,
-      req.body?.flag
+      req.body
     );
     res.json(state);
   } catch (err) {
@@ -58,6 +76,10 @@ router.post('/:matchId/review', requireSession, async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/matches/:matchId/result
+ * Available when status = ENDED.
+ */
 router.get('/:matchId/result', requireSession, async (req, res, next) => {
   try {
     const result = await calculateResult(req.params.matchId, req.player.id);

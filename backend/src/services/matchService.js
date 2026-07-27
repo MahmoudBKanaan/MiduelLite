@@ -1,8 +1,44 @@
 import { query, getClient } from '../db.js';
 
 /**
- * Load match and verify the requesting player is a participant.
+ * Authoritative turn order for each question.
+ * P1_ANSWER → P2_SCORE_P1 → P2_ANSWER → P1_SCORE_P2 → REVIEW
  */
+export const MATCH_PHASES = [
+  'P1_ANSWER',
+  'P2_SCORE_P1',
+  'P2_ANSWER',
+  'P1_SCORE_P2',
+  'REVIEW',
+];
+
+/**
+ * Validate answer text: length 1–500 after trim.
+ * @returns {{ ok: true, answer: string } | { ok: false, error: string }}
+ */
+export function validateAnswerText(answer) {
+  if (typeof answer !== 'string') {
+    return { ok: false, error: 'Answer must be a string' };
+  }
+  const trimmed = answer.trim();
+  if (trimmed.length < 1 || trimmed.length > 500) {
+    return { ok: false, error: 'Answer must be 1–500 characters' };
+  }
+  return { ok: true, answer: trimmed };
+}
+
+/**
+ * Validate peer score: integer 1–10.
+ * @returns {{ ok: true, score: number } | { ok: false, error: string }}
+ */
+export function validateScoreValue(score) {
+  const n = Number(score);
+  if (!Number.isInteger(n) || n < 1 || n > 10) {
+    return { ok: false, error: 'Score must be an integer from 1 to 10' };
+  }
+  return { ok: true, score: n };
+}
+
 async function loadMatch(matchId) {
   const res = await query('SELECT * FROM matches WHERE id = $1', [matchId]);
   if (res.rowCount === 0) {
@@ -13,14 +49,16 @@ async function loadMatch(matchId) {
   return res.rows[0];
 }
 
-function roleOf(match, playerId) {
-  if (match.player1_id === playerId) return 'PLAYER_1';
-  if (match.player2_id === playerId) return 'PLAYER_2';
+export function roleOf(match, playerId) {
+  const id = String(playerId);
+  if (String(match.player1_id) === id) return 'PLAYER_1';
+  if (String(match.player2_id) === id) return 'PLAYER_2';
   return null;
 }
 
 /**
- * Build player-facing match state.
+ * GET match state for the current player (items 45–46).
+ * Includes names, avatars, role, question, phase, relevant answers/scores, flags, status.
  */
 export async function getMatchState(matchId, playerId) {
   const match = await loadMatch(matchId);
@@ -35,18 +73,17 @@ export async function getMatchState(matchId, playerId) {
     `SELECT id, display_name, avatar_id, interests FROM players WHERE id = ANY($1::uuid[])`,
     [[match.player1_id, match.player2_id]]
   );
-  const p1 = players.rows.find((p) => p.id === match.player1_id);
-  const p2 = players.rows.find((p) => p.id === match.player2_id);
+  const p1 = players.rows.find((p) => String(p.id) === String(match.player1_id));
+  const p2 = players.rows.find((p) => String(p.id) === String(match.player2_id));
 
+  // Current question text while match is active (and last question when ended)
   let questionText = null;
-  if (match.status === 'ACTIVE') {
-    const q = await query(
-      `SELECT question_text FROM questions
-       WHERE competition_id = $1 AND question_number = $2`,
-      [match.competition_id, match.current_question]
-    );
-    questionText = q.rows[0]?.question_text ?? null;
-  }
+  const q = await query(
+    `SELECT question_text FROM questions
+     WHERE competition_id = $1 AND question_number = $2`,
+    [match.competition_id, match.current_question]
+  );
+  questionText = q.rows[0]?.question_text ?? null;
 
   const roundRes = await query(
     `SELECT * FROM match_rounds WHERE match_id = $1 AND question_number = $2`,
@@ -54,8 +91,8 @@ export async function getMatchState(matchId, playerId) {
   );
   const round = roundRes.rows[0] || null;
 
-  // Visibility rules: answers/scores only when appropriate for phase/role
-  let visible = {
+  // Relevant answer / score visibility by phase
+  const visible = {
     player1Answer: null,
     player2Answer: null,
     player1Score: null,
@@ -68,32 +105,37 @@ export async function getMatchState(matchId, playerId) {
 
   if (round) {
     const phase = match.phase;
+    const ended = match.status === 'ENDED';
+
+    // Player 1 may always see own answer after submit; opponent sees it from scoring onward
     if (
+      role === 'PLAYER_1' ||
       phase === 'P2_SCORE_P1' ||
       phase === 'P2_ANSWER' ||
       phase === 'P1_SCORE_P2' ||
       phase === 'REVIEW' ||
-      match.status === 'ENDED'
+      ended
     ) {
       visible.player1Answer = round.player1_answer;
     }
-    if (phase === 'P1_SCORE_P2' || phase === 'REVIEW' || match.status === 'ENDED') {
+
+    // Player 2 answer visible to scorer / review / end; P2 sees own after submit
+    if (
+      role === 'PLAYER_2' ||
+      phase === 'P1_SCORE_P2' ||
+      phase === 'REVIEW' ||
+      ended
+    ) {
       visible.player2Answer = round.player2_answer;
     }
-    if (phase === 'REVIEW' || match.status === 'ENDED') {
+
+    if (phase === 'REVIEW' || ended) {
       visible.player1Score = round.player1_score;
       visible.player2Score = round.player2_score;
       visible.player1Reviewed = round.player1_reviewed;
       visible.player2Reviewed = round.player2_reviewed;
     }
-    // Scorer always sees the answer they must score
-    if (phase === 'P2_SCORE_P1') {
-      visible.player1Answer = round.player1_answer;
-    }
-    if (phase === 'P1_SCORE_P2') {
-      visible.player2Answer = round.player2_answer;
-    }
-    // Own received score during review
+
     if (phase === 'REVIEW') {
       if (role === 'PLAYER_1') {
         visible.ownReceivedScore = round.player1_score;
@@ -129,20 +171,18 @@ export async function getMatchState(matchId, playerId) {
 }
 
 /**
- * Submit an answer for the current player's turn.
+ * POST answer — items 48–50.
+ * P1_ANSWER (P1) → P2_SCORE_P1
+ * P2_ANSWER (P2) → P1_SCORE_P2
  */
 export async function submitAnswer(matchId, playerId, answer) {
-  if (typeof answer !== 'string') {
-    const err = new Error('Answer must be a string');
+  const validated = validateAnswerText(answer);
+  if (!validated.ok) {
+    const err = new Error(validated.error);
     err.status = 400;
     throw err;
   }
-  const trimmed = answer.trim();
-  if (trimmed.length < 1 || trimmed.length > 500) {
-    const err = new Error('Answer must be 1–500 characters');
-    err.status = 400;
-    throw err;
-  }
+  const trimmed = validated.answer;
 
   const client = await getClient();
   try {
@@ -218,7 +258,11 @@ export async function submitAnswer(matchId, playerId, answer) {
     await client.query('COMMIT');
     return getMatchState(matchId, playerId);
   } catch (e) {
-    await client.query('ROLLBACK');
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
     throw e;
   } finally {
     client.release();
@@ -226,15 +270,18 @@ export async function submitAnswer(matchId, playerId, answer) {
 }
 
 /**
- * Submit a peer score (1–10).
+ * POST score — items 51–52 (+ phase advance).
+ * P2_SCORE_P1 (P2) → P2_ANSWER
+ * P1_SCORE_P2 (P1) → REVIEW
  */
 export async function submitScore(matchId, playerId, score) {
-  const n = Number(score);
-  if (!Number.isInteger(n) || n < 1 || n > 10) {
-    const err = new Error('Score must be an integer from 1 to 10');
+  const validated = validateScoreValue(score);
+  if (!validated.ok) {
+    const err = new Error(validated.error);
     err.status = 400;
     throw err;
   }
+  const n = validated.score;
 
   const client = await getClient();
   try {
@@ -310,7 +357,11 @@ export async function submitScore(matchId, playerId, score) {
     await client.query('COMMIT');
     return getMatchState(matchId, playerId);
   } catch (e) {
-    await client.query('ROLLBACK');
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
     throw e;
   } finally {
     client.release();
@@ -318,14 +369,118 @@ export async function submitScore(matchId, playerId, score) {
 }
 
 /**
- * Review received score: accept (flag=false) or flag (flag=true).
- * After both reviews, advance, complete, or three-flag terminate.
+ * Parse review action (item 58).
+ * ACCEPT → flag=false; FLAG → flag=true.
+ * Also accepts boolean body.flag as used by the API.
+ *
+ * @returns {{ ok: true, flag: boolean } | { ok: false, error: string }}
  */
-export async function submitReview(matchId, playerId, flag) {
-  if (typeof flag !== 'boolean') {
-    const err = new Error('flag must be a boolean');
-    err.status = 400;
-    throw err;
+export function parseReviewAction(body) {
+  if (body == null || typeof body !== 'object') {
+    return { ok: false, error: 'Review body is required' };
+  }
+  if (typeof body.flag === 'boolean') {
+    return { ok: true, flag: body.flag };
+  }
+  if (typeof body.action === 'string') {
+    const action = body.action.toUpperCase();
+    if (action === 'ACCEPT') return { ok: true, flag: false };
+    if (action === 'FLAG') return { ok: true, flag: true };
+  }
+  return {
+    ok: false,
+    error: 'Review must be ACCEPT (flag:false) or FLAG (flag:true)',
+  };
+}
+
+/**
+ * Pure decision for what happens after both players finish REVIEW.
+ *
+ * @param {number} flagCount - combined flagged scores so far
+ * @param {number} currentQuestion - question number just completed (1–10)
+ * @returns {{ type: 'THREE_FLAGS' } | { type: 'COMPLETED' } | { type: 'NEXT', nextQuestion: number }}
+ */
+export function resolveAfterBothReviews(flagCount, currentQuestion) {
+  if (flagCount >= 3) {
+    return { type: 'THREE_FLAGS' };
+  }
+  if (currentQuestion >= 10) {
+    return { type: 'COMPLETED' };
+  }
+  return { type: 'NEXT', nextQuestion: currentQuestion + 1 };
+}
+
+/**
+ * Apply post-REVIEW progression inside an open transaction:
+ * end by THREE_FLAGS / COMPLETED, or advance to the next question (P1_ANSWER).
+ *
+ * @param {import('pg').PoolClient} client
+ * @param {string} matchId
+ * @param {number} flagCount
+ * @param {number} currentQuestion
+ */
+export async function advanceMatch(client, matchId, flagCount, currentQuestion) {
+  const decision = resolveAfterBothReviews(flagCount, currentQuestion);
+  if (decision.type === 'THREE_FLAGS') {
+    await client.query(
+      `UPDATE matches
+       SET status = 'ENDED', end_reason = 'THREE_FLAGS', ended_at = NOW()
+       WHERE id = $1`,
+      [matchId]
+    );
+    return decision;
+  }
+  if (decision.type === 'COMPLETED') {
+    await client.query(
+      `UPDATE matches
+       SET status = 'ENDED', end_reason = 'COMPLETED', ended_at = NOW()
+       WHERE id = $1`,
+      [matchId]
+    );
+    return decision;
+  }
+  await client.query(
+    `UPDATE matches
+     SET current_question = $1, phase = 'P1_ANSWER'
+     WHERE id = $2`,
+    [decision.nextQuestion, matchId]
+  );
+  await client.query(
+    `INSERT INTO match_rounds (match_id, question_number) VALUES ($1, $2)`,
+    [matchId, decision.nextQuestion]
+  );
+  return decision;
+}
+
+/**
+ * POST review — items 56–61.
+ *
+ * Each player reviews only their own received score.
+ * Actions: ACCEPT (flag=false) or FLAG (flag=true).
+ * FLAG marks the score flagged and increments match.flag_count.
+ * Reviews are immutable once submitted.
+ *
+ * After both reviews:
+ *   flag_count >= 3 → ENDED / THREE_FLAGS
+ *   current_question = 10 → ENDED / COMPLETED
+ *   else → next question, phase = P1_ANSWER
+ *
+ * Phase transitions already enforced by submitScore (items 53–55):
+ *   P2_SCORE_P1 → P2_ANSWER → P1_SCORE_P2 → REVIEW
+ */
+export async function submitReview(matchId, playerId, flagOrBody) {
+  // Accept boolean flag or full body { flag } / { action }
+  let flag;
+  if (typeof flagOrBody === 'boolean') {
+    flag = flagOrBody;
+  } else {
+    const parsed = parseReviewAction(flagOrBody);
+    if (!parsed.ok) {
+      const err = new Error(parsed.error);
+      err.status = 400;
+      throw err;
+    }
+    flag = parsed.flag;
   }
 
   const client = await getClient();
@@ -364,9 +519,17 @@ export async function submitReview(matchId, playerId, flag) {
       [matchId, match.current_question]
     );
     const round = rRes.rows[0];
+    if (!round) {
+      const err = new Error('Round not found');
+      err.status = 404;
+      throw err;
+    }
 
+    // Each player reviews only their own received score (item 57)
+    // Player 1 reviews player1_score (given by P2); Player 2 reviews player2_score (given by P1)
     if (role === 'PLAYER_1') {
       if (round.player1_reviewed) {
+        // Immutable (item 60)
         const err = new Error('Review already submitted');
         err.status = 409;
         throw err;
@@ -391,6 +554,7 @@ export async function submitReview(matchId, playerId, flag) {
       );
     }
 
+    // FLAG → mark flagged (above) and increment match.flag_count (item 59)
     if (flag) {
       await client.query(
         `UPDATE matches SET flag_count = flag_count + 1 WHERE id = $1`,
@@ -412,39 +576,17 @@ export async function submitReview(matchId, playerId, flag) {
       r2.rows[0].player1_reviewed && r2.rows[0].player2_reviewed;
 
     if (both) {
-      if (m.flag_count >= 3) {
-        await client.query(
-          `UPDATE matches
-           SET status = 'ENDED', end_reason = 'THREE_FLAGS', ended_at = NOW()
-           WHERE id = $1`,
-          [matchId]
-        );
-      } else if (m.current_question >= 10) {
-        await client.query(
-          `UPDATE matches
-           SET status = 'ENDED', end_reason = 'COMPLETED', ended_at = NOW()
-           WHERE id = $1`,
-          [matchId]
-        );
-      } else {
-        const nextQ = m.current_question + 1;
-        await client.query(
-          `UPDATE matches
-           SET current_question = $1, phase = 'P1_ANSWER'
-           WHERE id = $2`,
-          [nextQ, matchId]
-        );
-        await client.query(
-          `INSERT INTO match_rounds (match_id, question_number) VALUES ($1, $2)`,
-          [matchId, nextQ]
-        );
-      }
+      await advanceMatch(client, matchId, m.flag_count, m.current_question);
     }
 
     await client.query('COMMIT');
     return getMatchState(matchId, playerId);
   } catch (e) {
-    await client.query('ROLLBACK');
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
     throw e;
   } finally {
     client.release();
@@ -452,8 +594,65 @@ export async function submitReview(matchId, playerId, flag) {
 }
 
 /**
- * Calculate final result excluding flagged scores.
- * Averages rounded to 1 decimal place.
+ * Average of scores, rounded to one decimal place. Empty list → 0.
+ * @param {number[]} scores
+ * @returns {number}
+ */
+export function averageScore(scores) {
+  if (!scores || scores.length === 0) return 0;
+  const sum = scores.reduce((a, b) => a + Number(b), 0);
+  return Math.round((sum / scores.length) * 10) / 10;
+}
+
+/**
+ * Collect non-flagged peer scores from match_rounds rows.
+ * player1_score = score given TO player 1 BY player 2 (and vice versa).
+ */
+export function collectValidScores(rounds) {
+  const player1Scores = [];
+  const player2Scores = [];
+  for (const r of rounds || []) {
+    if (r.player1_score != null && r.player1_score_flagged !== true) {
+      player1Scores.push(Number(r.player1_score));
+    }
+    if (r.player2_score != null && r.player2_score_flagged !== true) {
+      player2Scores.push(Number(r.player2_score));
+    }
+  }
+  return { player1Scores, player2Scores };
+}
+
+/**
+ * @returns {'PLAYER_1'|'PLAYER_2'|'DRAW'}
+ */
+export function determineWinner(player1Final, player2Final) {
+  if (player1Final > player2Final) return 'PLAYER_1';
+  if (player2Final > player1Final) return 'PLAYER_2';
+  return 'DRAW';
+}
+
+/**
+ * Compute final averages, winner, and questions completed from round rows.
+ */
+export function computeFinalScores(rounds) {
+  const { player1Scores, player2Scores } = collectValidScores(rounds);
+  const player1Final = averageScore(player1Scores);
+  const player2Final = averageScore(player2Scores);
+  return {
+    player1Final,
+    player2Final,
+    winner: determineWinner(player1Final, player2Final),
+    questionsCompleted: (rounds || []).length,
+  };
+}
+
+/**
+ * Build the result payload for an ENDED match.
+ * Averages only non-flagged scores; rounds to 1 decimal; winner or DRAW.
+ *
+ * @param {string} matchId
+ * @param {string} playerId - requesting participant (session-validated)
+ * @returns {Promise<object>} player names/avatars/scores, winner, flags, endReason
  */
 export async function calculateResult(matchId, playerId) {
   const match = await loadMatch(matchId);
@@ -473,36 +672,20 @@ export async function calculateResult(matchId, playerId) {
     `SELECT id, display_name, avatar_id FROM players WHERE id = ANY($1::uuid[])`,
     [[match.player1_id, match.player2_id]]
   );
-  const p1 = players.rows.find((p) => p.id === match.player1_id);
-  const p2 = players.rows.find((p) => p.id === match.player2_id);
+  const p1 = players.rows.find(
+    (p) => String(p.id) === String(match.player1_id)
+  );
+  const p2 = players.rows.find(
+    (p) => String(p.id) === String(match.player2_id)
+  );
 
   const rounds = await query(
     `SELECT * FROM match_rounds WHERE match_id = $1 ORDER BY question_number`,
     [matchId]
   );
 
-  const p1Scores = [];
-  const p2Scores = [];
-  for (const r of rounds.rows) {
-    if (r.player1_score != null && !r.player1_score_flagged) {
-      p1Scores.push(r.player1_score);
-    }
-    if (r.player2_score != null && !r.player2_score_flagged) {
-      p2Scores.push(r.player2_score);
-    }
-  }
-
-  const avg = (arr) => {
-    if (arr.length === 0) return 0;
-    const sum = arr.reduce((a, b) => a + b, 0);
-    return Math.round((sum / arr.length) * 10) / 10;
-  };
-
-  const player1Final = avg(p1Scores);
-  const player2Final = avg(p2Scores);
-  let winner = 'DRAW';
-  if (player1Final > player2Final) winner = 'PLAYER_1';
-  else if (player2Final > player1Final) winner = 'PLAYER_2';
+  const { player1Final, player2Final, winner, questionsCompleted } =
+    computeFinalScores(rounds.rows);
 
   return {
     matchId,
@@ -517,7 +700,7 @@ export async function calculateResult(matchId, playerId) {
       finalScore: player2Final,
     },
     winner,
-    questionsCompleted: rounds.rowCount,
+    questionsCompleted,
     flagCount: match.flag_count,
     endReason: match.end_reason,
   };

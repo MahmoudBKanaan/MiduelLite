@@ -1,12 +1,45 @@
+# Dependencies
 node_modules/
+
+# Environment secrets (use .env.example only)
 .env
+.env.local
+.env.*.local
+
+# Test / coverage
 coverage/
+*.lcov
+
+# Build / dist (frontend Vite, generic)
 dist/
 build/
+frontend/dist/
+backend/dist/
+
+# Vite
+.vite/
+frontend/.vite/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
 .DS_Store
 Thumbs.db
-.vite/
-frontend/dist/
-backend/coverage/
-frontend/coverage/
+*.swp
+.idea/
+.vscode/
+*.code-workspace
+
+# Optional local tooling
+.turbo/
+tmp/
+temp/
+
+# Local working copies / editor locks
+* - Copy.*
+*Copy.docx
+~$*.docx

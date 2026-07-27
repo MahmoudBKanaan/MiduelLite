@@ -1,3 +1,4 @@
+# Minduel Lite — three services: frontend, backend, database
 services:
   database:
     image: postgres:16-alpine
@@ -7,6 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-minduel}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # Init on new volume only
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     ports:
@@ -32,6 +34,7 @@ services:
   frontend:
     build: ./frontend
     environment:
+      # Browser on host reaches backend via published port
       VITE_API_URL: http://localhost:3001
     ports:
       - "5173:5173"

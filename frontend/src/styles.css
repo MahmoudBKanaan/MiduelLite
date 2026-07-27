@@ -1,0 +1,406 @@
+/*
+ * Minduel Lite — single global stylesheet (items 116–120)
+ * Mobile-first, max-width ~480px, centered on larger screens.
+ * Simple only: readable text, clear buttons, contrast, spacing, selected states.
+ */
+
+:root {
+  --bg: #0f1419;
+  --surface: #1a2332;
+  --surface-2: #243044;
+  --text: #e8eef7;
+  --muted: #a8b8cc;
+  --accent: #4f8cff;
+  --accent-hover: #3a78eb;
+  --success: #3ecf8e;
+  --danger: #ff6b6b;
+  --border: #3d4f66;
+  --radius: 12px;
+  --space: 1rem;
+  --line: 1.45;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: var(--line);
+}
+
+/* Centered app shell — mobile first, max ~480px on all screens */
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 100vh;
+  padding: var(--space);
+}
+
+/* Typography */
+h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 var(--space);
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+}
+
+/* Layout blocks */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: var(--space);
+}
+
+/* Forms */
+label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+}
+
+input[type='text'],
+textarea {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.75rem 0.85rem;
+  font-size: 1rem;
+  line-height: var(--line);
+  margin-bottom: var(--space);
+}
+
+input[type='text']:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Buttons — full width, obvious primary action */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #ffffff;
+  margin-top: 0.5rem;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #2c3a52;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #1a0505;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #062216;
+}
+
+/* Avatar grid + selected state */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: var(--space);
+}
+
+.avatar-btn {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.avatar-btn.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.45);
+}
+
+.avatar-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.player-pill img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Interest chips + selected state */
+.interest-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.selection-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.95rem;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+/* Pool waiting */
+.waiting {
+  text-align: center;
+  padding: 1.25rem 0;
+}
+
+.pool-interests {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.pool-interests li {
+  margin: 0.2rem 0;
+}
+
+/* Simple loading indicator only (no elaborate animation) */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 1rem auto;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Match header */
+.players-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: var(--space);
+}
+
+.player-pill {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.65rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.question {
+  font-size: 1.05rem;
+  line-height: var(--line);
+  margin: 0 0 var(--space);
+  color: var(--text);
+}
+
+/* Score buttons + selected state */
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.score-btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.65rem 0;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.score-btn.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.score-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.answer-preview {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
+.result-score {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+  color: var(--text);
+}
+
+.winner-banner {
+  text-align: center;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space);
+  color: var(--text);
+}
+
+.winner-banner strong {
+  display: block;
+  font-size: 1.35rem;
+  margin-top: 0.25rem;
+  color: var(--accent);
+}
+
+.stack-gap > * + * {
+  margin-top: 0.5rem;
+}

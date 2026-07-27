@@ -6,6 +6,9 @@ import playersRouter from './routes/players.js';
 import poolRouter from './routes/pool.js';
 import matchesRouter from './routes/matches.js';
 
+/**
+ * Build the Express application (exported for tests).
+ */
 export function createApp() {
   const app = express();
 
@@ -32,6 +35,11 @@ export function createApp() {
   app.use('/api/pool', poolRouter);
   app.use('/api/matches', matchesRouter);
 
+  app.use((_req, res) => {
+    res.status(404).json({ error: 'Not found' });
+  });
+
+  // Never expose stack traces to the client
   app.use((err, _req, res, _next) => {
     const status = err.status || 500;
     const message =
