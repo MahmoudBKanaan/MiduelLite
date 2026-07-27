@@ -1,0 +1,2495 @@
+﻿================================================================================
+MIN DUEL LITE
+UNIVERSITY MVP — FULL-STACK WEB APPLICATION KNOWLEDGE BASE
+================================================================================
+Version: 1.0
+Status: AUTHORITATIVE BUILD SPECIFICATION
+Purpose: IU Software Development Oral Project Report
+Examination option: Task 2 — Development of a Web Application
+Application type: Mobile-first responsive web application / SPA
+Primary objective: Minimum-development-effort operational university submission
+Production objective: NONE
+Post-submission use objective: NONE
+Technology:
+- Frontend: React
+- Backend: Node.js + Express
+- Database: PostgreSQL
+- Communication: REST/JSON + short polling
+- Containerization: Docker + Docker Compose
+This document is the single source of truth for the project.
+Any functionality not explicitly included in this knowledge base is OUT OF SCOPE unless
+it becomes necessary to satisfy an explicit university requirement.
+================================================================================
+1. PROJECT PHILOSOPHY
+================================================================================
+The primary objective of this project is NOT to create a production-ready social platform.
+The objective is to create the smallest practical full-stack application that:
+1. satisfies the IU web application assignment,
+2. demonstrates frontend development,
+3. demonstrates backend development,
+4. demonstrates relational database persistence,
+5. demonstrates meaningful application logic,
+6. demonstrates interaction between two users,
+7. can be executed locally,
+8. can be demonstrated reliably,
+9. can be tested adequately,
+10. can be Dockerized,
+11. can be documented,
+12. can be critically evaluated during the oral project report.
+Every architectural or implementation decision MUST favor:
+1. low development time,
+2. low technical complexity,
+3. low dependency count,
+4. easy debugging,
+5. easy local execution,
+6. easy explanation during the presentation.
+Production scalability, commercial readiness, advanced security, high availability,
+cloud deployment and sophisticated UX are explicitly NOT project objectives.
+================================================================================
+2. PROJECT NAME
+================================================================================
+Working name:
+Minduel Lite
+Alternative academic title:
+"Minduel Lite: An Interest-Based Two-Player Intellectual Competition Web Application"
+The working name may be changed without affecting requirements.
+================================================================================
+3. PROJECT PROBLEM
+================================================================================
+Online users may wish to participate in short intellectual interactions with another person
+without creating an account, maintaining a permanent profile, building social connections
+or using a complicated platform.
+Many multiplayer systems require registration, authentication, profile management,
+ranking systems and other persistent functionality before a user can participate.
+Minduel Lite addresses this by providing an extremely lightweight interaction:
+1. create an anonymous temporary profile,
+2. select three interests,
+3. enter a matchmaking pool,
+4. be matched with a compatible player,
+5. answer ten questions,
+6. score the opponent's answers,
+7. obtain a match result,
+8. optionally play again.
+================================================================================
+4. TARGET USER
+================================================================================
+Primary user:
+A person who wants to participate in a short anonymous intellectual competition with
+another available participant.
+No user account exists.
+No permanent identity exists.
+No personally identifiable information is required.
+The application only asks for:
+- temporary display name,
+- predefined avatar,
+- three interests.
+================================================================================
+5. USER BENEFIT
+================================================================================
+The user can immediately participate in an intellectual two-player competition without:
+- registering,
+- providing an email address,
+- creating a password,
+- maintaining a permanent account,
+- adding friends,
+- configuring complex settings.
+The application emphasizes immediate participation.
+================================================================================
+6. EXAMINATION SCOPE
+================================================================================
+This project is designed specifically for:
+IU Course:
+DLBSEPPSD01_E — Software Development
+Selected examination task:
+Development of a Web Application.
+The application MUST therefore provide:
+- a Single Page Application,
+- a modern frontend framework,
+- an associated backend,
+- suitable tests covering core functionality,
+- appropriately documented code,
+- Docker containerization,
+- Docker Compose,
+- backend documentation,
+- backend testing,
+- a documented software architecture,
+- wireframes,
+- a selected and justified development process model,
+- exemplary code excerpts suitable for presentation,
+- critical evaluation,
+- GitHub repository publication.
+The presentation must additionally explain:
+- project goal,
+- problem,
+- target users,
+- user benefit,
+- planning,
+- methodology,
+- architecture,
+- implementation,
+- results,
+- testing,
+- limitations,
+- lessons learned,
+- potential improvements.
+================================================================================
+7. APPLICATION CLASSIFICATION
+================================================================================
+Minduel Lite is NOT an Android native mobile application.
+It is:
+A MOBILE-FIRST FULL-STACK WEB APPLICATION.
+The frontend should visually work well at approximately:
+390 × 844 px
+but must remain a browser application.
+The application can also operate on desktop browsers.
+No Android APK is required.
+No Kotlin is required.
+No React Native is required.
+No native mobile APIs are required.
+================================================================================
+8. MVP SCOPE
+================================================================================
+The complete user-visible application contains FOUR screens only.
+SCREEN 1 — Welcome / Profile Setup
+SCREEN 2 — Matchmaking Pool
+SCREEN 3 — Match
+SCREEN 4 — Results
+Nothing else should be added unless technically necessary.
+================================================================================
+9. EXPLICITLY OUT OF SCOPE
+================================================================================
+The following MUST NOT be implemented for the MVP:
+- signup
+- login
+- passwords
+- email verification
+- OAuth
+- JWT login authentication
+- permanent accounts
+- password reset
+- user profile pages
+- profile editing screen
+- friends
+- friend requests
+- followers
+- chat system
+- private messaging
+- rankings
+- leaderboards
+- achievements
+- XP
+- levels
+- badges
+- permanent statistics
+- match history UI
+- notifications
+- email
+- SMS
+- push notifications
+- payment
+- subscriptions
+- advertisements
+- purchases
+- analytics
+- admin dashboard
+- CMS
+- moderation dashboard
+- AI
+- recommendation engine
+- advanced vector database
+- Elasticsearch
+- Redis
+- message queues
+- microservices
+- Kubernetes
+- cloud deployment
+- CDN
+- monitoring
+- Prometheus
+- Grafana
+- backups
+- disaster recovery
+- high availability
+- multi-region architecture
+- file uploads
+- custom profile pictures
+- user-generated avatars
+- localization
+- multiple languages
+- social sharing
+- spectators
+- tournaments
+- competition creation
+- question creation UI
+- question editing UI
+- category administration
+- connection recovery
+- production-grade abuse prevention
+- production-grade security
+- WebRTC audio
+- LiveKit
+- video
+- voice recording
+These features may be mentioned during critical evaluation as possible future improvements.
+They MUST NOT be implemented for the university MVP.
+================================================================================
+10. LIVE AUDIO DECISION
+================================================================================
+Live audio is explicitly OUT OF SCOPE.
+Browser-to-browser audio could technically be implemented using WebRTC while Node.js
+acts as a signaling server.
+However, this introduces:
+- microphone permissions,
+- WebRTC peer connections,
+- signaling,
+- ICE negotiation,
+- STUN configuration,
+- possible TURN requirements,
+- connection failure handling,
+- additional browser-state complexity,
+- additional testing requirements.
+None of this is required by the IU task.
+Therefore:
+ADR-001:
+LIVE AUDIO SHALL NOT BE IMPLEMENTED.
+The application uses text answers only.
+This provides the intellectual interaction needed for the demonstration with substantially
+less technical overhead.
+================================================================================
+11. PRIMARY USER JOURNEY
+================================================================================
+NORMAL FLOW
+User opens application URL
+        |
+        v
+Welcome screen
+        |
+        | enters name
+        | selects avatar
+        | selects exactly 3 interests
+        v
+Create temporary player
+        |
+        v
+Enter matchmaking pool
+        |
+        v
+Search for compatible opponent
+        |
+        v
+Opponent found
+        |
+        v
+Match created
+        |
+        v
+Question 1
+        |
+        v
+Player 1 answers
+        |
+        v
+Player 2 scores Player 1
+        |
+        v
+Player 2 answers
+        |
+        v
+Player 1 scores Player 2
+        |
+        v
+Both review received scores
+        |
+        v
+Question 2
+        |
+       ...
+        |
+        v
+Question 10 completed
+        |
+        v
+Results
+        |
+        +------> Play Again
+        |
+        +------> Reset Profile
+        |
+        +------> Exit
+================================================================================
+12. WELCOME SCREEN
+================================================================================
+Route:
+/
+Purpose:
+Create the user's temporary anonymous profile.
+Required fields:
+1. Display name
+2. Avatar
+3. Exactly three interests
+--------------------------------------------------
+12.1 DISPLAY NAME
+--------------------------------------------------
+Field:
+displayName
+Rules:
+- required
+- minimum 2 characters
+- maximum 20 characters
+- leading/trailing whitespace removed
+- no uniqueness requirement
+- two players may use identical names
+No account is associated with the name.
+--------------------------------------------------
+12.2 AVATAR
+--------------------------------------------------
+The user chooses ONE avatar.
+Avatars are predefined application assets.
+Recommended quantity:
+12 avatars.
+Avatar data should contain only:
+avatarId
+Example:
+1
+2
+3
+...
+12
+Images are stored locally in the frontend.
+No upload functionality exists.
+--------------------------------------------------
+12.3 INTERESTS
+--------------------------------------------------
+The user MUST select exactly three interests.
+Available interests:
+01. Technology
+02. Artificial Intelligence
+03. Programming
+04. Science
+05. Mathematics
+06. Engineering
+07. Space
+08. Philosophy
+09. Psychology
+10. History
+11. Politics
+12. Economics
+13. Business
+14. Society
+15. Ethics
+16. Education
+17. Environment
+18. Health
+19. Law
+20. Religion
+21. Culture
+22. Literature
+23. Art
+24. Music
+25. Film
+26. Media
+27. Design
+28. Gaming
+29. Sports
+30. Travel
+31. Language
+32. Future
+Business rules:
+- fewer than three selections -> cannot continue
+- more than three selections -> prevent selection
+- duplicates impossible
+- interests are predefined
+- users cannot create interests
+--------------------------------------------------
+12.4 CONTINUE
+--------------------------------------------------
+When valid:
+POST /api/players
+The backend creates:
+- player ID
+- session token
+- name
+- avatar ID
+- selected interests
+The frontend stores:
+playerId
+sessionToken
+inside:
+sessionStorage
+Then navigate to:
+/pool
+================================================================================
+13. TEMPORARY SESSION IDENTITY
+================================================================================
+There is NO login authentication.
+There is NO account authentication.
+However, requests need a minimal mechanism preventing one browser session from
+accidentally modifying another player's match.
+When a temporary player is created, the backend generates:
+playerId = random UUID
+sessionToken = random UUID
+The browser stores both in sessionStorage.
+Protected player operations send:
+X-Player-Id
+X-Session-Token
+The backend confirms that the token belongs to the player.
+This mechanism is:
+- temporary,
+- anonymous,
+- not a login system,
+- not a permanent authentication system.
+Its sole purpose is maintaining session ownership during the demonstration.
+================================================================================
+14. POOL SCREEN
+================================================================================
+Route:
+/pool
+Purpose:
+Place the current player into matchmaking and wait for a compatible opponent.
+Display:
+- player's avatar
+- player's name
+- three interests
+- "Searching for opponent..."
+- simple loading animation
+Optional control:
+Cancel
+No other functionality.
+When the screen loads:
+POST /api/pool/join
+If no compatible player exists:
+backend adds player to queue.
+Frontend displays:
+"Searching for opponent..."
+Frontend polls:
+GET /api/pool/status
+Recommended polling interval:
+1000 milliseconds.
+No WebSocket implementation is required.
+When a match exists:
+response contains matchId.
+Frontend navigates:
+/match/{matchId}
+================================================================================
+15. WHY POLLING IS USED
+================================================================================
+ADR-002:
+SHORT POLLING SHALL BE USED INSTEAD OF WEBSOCKETS.
+Every approximately 1 second the frontend requests current state.
+Reasons:
+- dramatically simpler implementation,
+- sufficient for two-player academic demonstration,
+- easier debugging,
+- no socket connection lifecycle,
+- no reconnection architecture,
+- no additional server infrastructure,
+- easy to explain.
+Expected load during university demonstration is insignificant.
+Production efficiency is irrelevant to the project objective.
+================================================================================
+16. INTEREST VECTOR MODEL
+================================================================================
+Each user selects exactly 3 interests from 32.
+The profile can therefore be represented as a 32-dimensional binary vector.
+Example:
+Player A:
+Technology
+Science
+Philosophy
+Vector conceptually:
+[1,0,0,1,0,0,0,1,0,...]
+Player B:
+Technology
+Science
+History
+Vector:
+[1,0,0,1,0,0,0,0,0,1,...]
+Shared interests:
+2
+Because every player has exactly three selected interests, complex vector mathematics is
+unnecessary.
+Similarity is:
+sharedInterestCount = number of identical interest IDs
+Possible values:
+3 = strongest compatibility
+2 = strong compatibility
+1 = acceptable compatibility
+0 = incompatible
+For academic explanation, normalized similarity may be presented as:
+similarity = sharedInterestCount / 3
+Therefore:
+3 shared = 1.00
+2 shared = 0.67
+1 shared = 0.33
+0 shared = 0.00
+No machine learning is involved.
+No vector database is involved.
+No embedding model is involved.
+================================================================================
+17. MATCHMAKING ALGORITHM
+================================================================================
+When a player joins the queue:
+STEP 1
+Retrieve all waiting players except the current player.
+STEP 2
+Calculate shared interest count against every candidate.
+STEP 3
+Discard candidates sharing zero interests.
+STEP 4
+Find the candidate with the greatest sharedInterestCount.
+Priority:
+3 shared interests
+then
+2 shared interests
+then
+1 shared interest.
+STEP 5
+If multiple players have identical compatibility:
+match the player who entered the queue earliest.
+STEP 6
+Create match.
+STEP 7
+Remove both users from queue.
+STEP 8
+Return match ID.
+Pseudo-code:
+candidates = waitingPlayers excluding currentPlayer
+for candidate in candidates:
+    overlap = countSharedInterests(
+        currentPlayer.interests,
+        candidate.interests
+    )
+eligible = candidates where overlap >= 1
+sort eligible by:
+    overlap DESC
+    joinedAt ASC
+bestCandidate = first eligible candidate
+if bestCandidate exists:
+    createMatch(currentPlayer, bestCandidate)
+else:
+    addCurrentPlayerToQueue()
+IMPORTANT:
+Users with zero shared interests are NOT matched.
+They remain in the pool until a compatible user becomes available.
+================================================================================
+18. PLAYER ROLE ASSIGNMENT
+================================================================================
+When matchmaking occurs:
+The player already waiting in the queue becomes:
+PLAYER 1
+The newly joining player becomes:
+PLAYER 2
+This avoids unnecessary random-role logic.
+Roles apply only to the current match.
+================================================================================
+19. QUESTION BANK
+================================================================================
+The database contains:
+100 predefined competitions.
+Each competition contains:
+10 predefined questions.
+Therefore:
+100 × 10 = 1,000 questions.
+The term "competition" in question storage means:
+QUESTION SET
+It does NOT represent a played match.
+At match creation:
+1. backend selects one competition ID randomly from 1–100,
+2. that question set becomes the match question set,
+3. questions 1 through 10 are presented sequentially.
+Questions have:
+- no correct answer,
+- no expected answer,
+- no automatic grading,
+- no tags,
+- no AI evaluation,
+- no difficulty system.
+Players score each other's answers.
+================================================================================
+20. QUESTION DATABASE REQUIREMENT
+================================================================================
+The questions table requires only:
+competition_id
+question_number
+question_text
+Example:
+competition_id: 42
+question_number: 1
+question_text:
+"Does technological progress necessarily improve human life?"
+No answer data is stored with the question.
+No scoring key exists.
+================================================================================
+21. MATCH SCREEN
+================================================================================
+Route:
+/match/:matchId
+This is the only gameplay screen.
+It dynamically changes according to current match phase.
+Always display:
+- Player 1 name/avatar
+- Player 2 name/avatar
+- question progress: X / 10
+- current question
+- current game phase where useful
+================================================================================
+22. QUESTION SEQUENCE
+================================================================================
+Every question follows the exact same sequence.
+--------------------------------------------------
+PHASE A — PLAYER 1 ANSWERS
+--------------------------------------------------
+Both players see the question.
+Player 1 sees:
+Answer textbox
+Submit Answer
+Player 2 sees:
+"Waiting for Player 1..."
+Player 1 submits answer.
+--------------------------------------------------
+PHASE B — PLAYER 2 SCORES PLAYER 1
+--------------------------------------------------
+Player 2 sees Player 1's submitted answer.
+Player 2 selects score.
+Player 1 sees:
+"Waiting for opponent to score your answer..."
+Player 2 submits score.
+--------------------------------------------------
+PHASE C — PLAYER 2 ANSWERS
+--------------------------------------------------
+Player 2 now writes their answer.
+Player 1 sees:
+"Waiting for Player 2..."
+Player 2 submits answer.
+--------------------------------------------------
+PHASE D — PLAYER 1 SCORES PLAYER 2
+--------------------------------------------------
+Player 1 sees Player 2's answer.
+Player 1 selects score.
+Player 2 sees:
+"Waiting for opponent to score your answer..."
+Player 1 submits score.
+--------------------------------------------------
+PHASE E — SCORE REVIEW
+--------------------------------------------------
+Each player sees the score they received.
+Each chooses:
+ACCEPT SCORE
+or
+FLAG SCORE
+The player may flag only:
+THE SCORE GIVEN TO THEM.
+A player cannot flag the score given to the opponent.
+After both players have reviewed their received scores:
+- check total flag count,
+- either end match,
+- or advance to next question.
+================================================================================
+23. ANSWER RULES
+================================================================================
+Answers are plain text.
+Constraints:
+Minimum:
+1 character.
+Maximum:
+500 characters.
+Recommended UI:
+textarea.
+No formatting.
+No Markdown.
+No image.
+No attachment.
+No links processing.
+No audio.
+No rich text.
+Answer becomes immutable once submitted.
+================================================================================
+24. SCORING SYSTEM
+================================================================================
+Score scale:
+1 through 10.
+Only integers are accepted.
+UI should display ten simple score buttons:
+1 2 3 4 5 6 7 8 9 10
+Score meaning does not need complicated definitions.
+Simple guidance:
+1 = very weak answer
+10 = excellent answer
+The scoring is intentionally subjective.
+================================================================================
+25. SCORE FLAGGING / STRIKING
+================================================================================
+A player may flag the score they received.
+Example:
+Player 2 gives Player 1:
+Score = 3
+Player 1 may select:
+FLAG SCORE
+The score then becomes:
+flagged = true
+A flagged score is STRUCK.
+Struck scores are excluded from final score calculation.
+A score can be flagged only once.
+A review action becomes immutable after submission.
+================================================================================
+26. THREE-FLAG TERMINATION RULE
+================================================================================
+The match tracks:
+totalFlagCount
+This is the COMBINED number of flagged scores from both players.
+Example:
+Player 1 flags two received scores.
+Player 2 flags one received score.
+totalFlagCount = 3
+When:
+totalFlagCount >= 3
+the match ends immediately.
+End reason:
+THREE_FLAGS
+Remaining questions are not played.
+================================================================================
+27. NORMAL MATCH TERMINATION
+================================================================================
+The match ends normally after:
+Question 10
+has completed:
+- Player 1 answer,
+- Player 2 score,
+- Player 2 answer,
+- Player 1 score,
+- both score reviews.
+End reason:
+COMPLETED
+================================================================================
+28. FINAL SCORE CALCULATION
+================================================================================
+Only non-flagged received scores are included.
+For Player 1:
+validPlayer1Scores =
+scores assigned to Player 1
+where flagged = false
+Player 1 final score:
+average(validPlayer1Scores)
+For Player 2:
+validPlayer2Scores =
+scores assigned to Player 2
+where flagged = false
+Player 2 final score:
+average(validPlayer2Scores)
+Use average rather than raw total because flagged scores may result in the players having
+different numbers of valid scores.
+Round to:
+1 decimal place.
+Example:
+Player 1 valid scores:
+8, 7, 9, 8, 7
+Average:
+7.8
+Player 2 valid scores:
+6, 8, 6, 7, 7
+Average:
+6.8
+Winner:
+Player 1
+If averages are identical:
+DRAW
+If a player somehow has zero valid scores:
+final score = 0
+================================================================================
+29. RESULTS SCREEN
+================================================================================
+Route:
+/result/:matchId
+Display:
+MATCH COMPLETE
+Player 1:
+- avatar
+- name
+- final score
+Player 2:
+- avatar
+- name
+- final score
+Winner:
+Player 1
+or
+Player 2
+or
+Draw
+Also display:
+Questions completed:
+X / 10
+Flags:
+X / 3+
+End reason:
+Completed
+or
+Ended after three flagged scores
+Buttons:
+PLAY AGAIN
+RESET PROFILE
+EXIT
+================================================================================
+30. RESULT ACTIONS
+================================================================================
+--------------------------------------------------
+PLAY AGAIN
+--------------------------------------------------
+Keep:
+- same player ID
+- same name
+- same avatar
+- same three interests
+Navigate:
+/pool
+Join matchmaking again.
+--------------------------------------------------
+RESET PROFILE
+--------------------------------------------------
+Clear:
+sessionStorage
+Navigate:
+/
+The user creates a new temporary profile.
+For this academic MVP, resetting the profile does not require deletion of historical
+database rows.
+The old anonymous session simply becomes unreachable.
+--------------------------------------------------
+EXIT
+--------------------------------------------------
+Clear sessionStorage.
+Navigate:
+/
+Alternatively the user may simply close the browser.
+================================================================================
+31. NO MATCH HISTORY
+================================================================================
+The database may contain old match rows because they are required for runtime operation
+and demonstration.
+However:
+There is NO user-visible history screen.
+There is NO permanent account connecting matches together.
+Historical data retention is not an application feature.
+For a completely clean demo database:
+docker compose down -v
+may be used.
+================================================================================
+32. MATCH STATE MACHINE
+================================================================================
+MATCH STATUS:
+ACTIVE
+ENDED
+ACTIVE MATCH PHASES:
+P1_ANSWER
+P2_SCORE_P1
+P2_ANSWER
+P1_SCORE_P2
+REVIEW
+Flow:
+P1_ANSWER
+    |
+    v
+P2_SCORE_P1
+    |
+    v
+P2_ANSWER
+    |
+    v
+P1_SCORE_P2
+    |
+    v
+REVIEW
+    |
+    +---- flags >= 3 ----> ENDED
+    |
+    +---- question = 10 -> ENDED
+    |
+    +---- otherwise -----> next question
+                              |
+                              v
+                          P1_ANSWER
+================================================================================
+33. SERVER AUTHORITY
+================================================================================
+The backend is authoritative for:
+- player session validation,
+- queue membership,
+- matchmaking,
+- player roles,
+- current match phase,
+- current question,
+- answers,
+- scores,
+- score flags,
+- question progression,
+- match termination,
+- result calculation.
+The frontend MUST NOT determine game state independently.
+The frontend only:
+- displays server state,
+- collects input,
+- submits permitted actions.
+================================================================================
+34. DATABASE
+================================================================================
+Database:
+PostgreSQL
+No ORM is required.
+Use:
+node-postgres ("pg")
+Reason:
+Using direct SQL avoids introducing:
+- Prisma,
+- Sequelize,
+- TypeORM,
+- migrations framework,
+- generated clients,
+- extra configuration.
+The database schema can be initialized using:
+database/schema.sql
+and seeded using:
+database/seed.sql
+================================================================================
+35. DATABASE TABLES
+================================================================================
+Exactly five primary tables are sufficient:
+1. players
+2. queue_entries
+3. questions
+4. matches
+5. match_rounds
+================================================================================
+36. TABLE — players
+================================================================================
+Purpose:
+Temporary player sessions.
+Fields:
+id                  UUID PRIMARY KEY
+session_token       UUID NOT NULL
+display_name        VARCHAR(20) NOT NULL
+avatar_id           SMALLINT NOT NULL
+interests           SMALLINT[] NOT NULL
+created_at          TIMESTAMPTZ DEFAULT NOW()
+Validation:
+avatar_id:
+1–12
+interest IDs:
+1–32
+number of interests:
+exactly 3
+uniqueness:
+three interests must be different
+No email.
+No password.
+No username uniqueness.
+================================================================================
+37. TABLE — queue_entries
+================================================================================
+Purpose:
+Players currently waiting for matchmaking.
+Fields:
+player_id           UUID PRIMARY KEY
+joined_at           TIMESTAMPTZ DEFAULT NOW()
+Foreign key:
+player_id -> players.id
+One player may have only one active queue entry.
+================================================================================
+38. TABLE — questions
+================================================================================
+Purpose:
+Predefined question bank.
+Fields:
+competition_id      SMALLINT NOT NULL
+question_number     SMALLINT NOT NULL
+question_text       TEXT NOT NULL
+Primary key:
+(competition_id, question_number)
+Constraints:
+competition_id:
+1–100
+question_number:
+1–10
+Expected rows:
+1,000
+================================================================================
+39. TABLE — matches
+================================================================================
+Purpose:
+Current and completed match state.
+Fields:
+id                  UUID PRIMARY KEY
+player1_id          UUID NOT NULL
+player2_id          UUID NOT NULL
+competition_id      SMALLINT NOT NULL
+current_question    SMALLINT NOT NULL DEFAULT 1
+phase               VARCHAR NOT NULL
+status              VARCHAR NOT NULL DEFAULT 'ACTIVE'
+flag_count          SMALLINT NOT NULL DEFAULT 0
+end_reason          VARCHAR NULL
+created_at          TIMESTAMPTZ DEFAULT NOW()
+ended_at            TIMESTAMPTZ NULL
+Allowed phase:
+P1_ANSWER
+P2_SCORE_P1
+P2_ANSWER
+P1_SCORE_P2
+REVIEW
+Allowed status:
+ACTIVE
+ENDED
+Allowed end_reason:
+COMPLETED
+THREE_FLAGS
+================================================================================
+40. TABLE — match_rounds
+================================================================================
+Purpose:
+Store one row for each played question.
+Primary key:
+(match_id, question_number)
+Fields:
+match_id                  UUID
+question_number           SMALLINT
+player1_answer            TEXT NULL
+player1_score             SMALLINT NULL
+player1_score_flagged     BOOLEAN DEFAULT FALSE
+player1_reviewed          BOOLEAN DEFAULT FALSE
+player2_answer            TEXT NULL
+player2_score             SMALLINT NULL
+player2_score_flagged     BOOLEAN DEFAULT FALSE
+player2_reviewed          BOOLEAN DEFAULT FALSE
+Meaning:
+player1_score =
+score Player 2 assigned to Player 1.
+player2_score =
+score Player 1 assigned to Player 2.
+Score constraint:
+1–10 when present.
+================================================================================
+41. DATABASE RELATIONSHIP MODEL
+================================================================================
+players
+   |
+   | 1
+   |
+   |----< queue_entries
+players
+   |
+   |----< matches >----|
+   |                   |
+ player1             player2
+matches
+   |
+   | 1
+   |
+   |----< match_rounds
+questions
+   |
+ competition_id + question_number
+   |
+   |---- referenced logically by match competition
+         and round question number
+================================================================================
+42. QUESTION SEEDING
+================================================================================
+database/seed.sql MUST populate:
+100 competition IDs
+with:
+10 questions each.
+Total:
+1,000 questions.
+No separate administration system is required.
+Question creation happens only through seed data.
+================================================================================
+43. BACKEND TECHNOLOGY
+================================================================================
+Runtime:
+Node.js
+Framework:
+Express
+Database client:
+pg
+Minimal useful dependencies:
+express
+pg
+cors
+helmet
+dotenv
+Development/test dependencies:
+vitest
+supertest
+Do NOT introduce dependencies unless they clearly reduce development effort.
+================================================================================
+44. BACKEND MODULE STRUCTURE
+================================================================================
+Recommended minimal structure:
+backend/
+|
+|-- src/
+|   |
+|   |-- server.js
+|   |-- app.js
+|   |-- db.js
+|   |
+|   |-- config/
+|   |   |-- interests.js
+|   |
+|   |-- routes/
+|   |   |-- players.js
+|   |   |-- pool.js
+|   |   |-- matches.js
+|   |
+|   |-- services/
+|       |-- matchmakingService.js
+|       |-- matchService.js
+|
+|-- tests/
+|
+|-- package.json
+|-- Dockerfile
+No controller/service/repository architecture is required beyond what helps readability.
+Do NOT add unnecessary architectural layers.
+================================================================================
+45. REST API
+================================================================================
+Base:
+/api
+--------------------------------------------------
+GET /api/health
+--------------------------------------------------
+Purpose:
+Verify backend operation.
+Response:
+{
+  "status": "ok"
+}
+--------------------------------------------------
+GET /api/config
+--------------------------------------------------
+Returns:
+- 32 interests
+- valid avatar IDs
+--------------------------------------------------
+POST /api/players
+--------------------------------------------------
+Creates temporary player.
+Request:
+{
+  "displayName": "Neo",
+  "avatarId": 4,
+  "interestIds": [1, 4, 8]
+}
+Response:
+{
+  "playerId": "...",
+  "sessionToken": "..."
+}
+--------------------------------------------------
+POST /api/pool/join
+--------------------------------------------------
+Requires session identity.
+Attempts matchmaking.
+Response when waiting:
+{
+  "status": "WAITING"
+}
+Response when immediately matched:
+{
+  "status": "MATCHED",
+  "matchId": "..."
+}
+--------------------------------------------------
+GET /api/pool/status
+--------------------------------------------------
+Requires session identity.
+Response:
+WAITING
+or
+MATCHED + matchId.
+--------------------------------------------------
+POST /api/pool/leave
+--------------------------------------------------
+Remove current player from waiting queue.
+--------------------------------------------------
+GET /api/matches/:matchId
+--------------------------------------------------
+Returns current match state relevant to current player.
+Includes:
+- players
+- role
+- current question
+- phase
+- answers when appropriate
+- scores when appropriate
+- flag count
+- status
+--------------------------------------------------
+POST /api/matches/:matchId/answer
+--------------------------------------------------
+Request:
+{
+  "answer": "..."
+}
+Backend verifies:
+- correct player,
+- correct phase,
+- answer length,
+- match active.
+--------------------------------------------------
+POST /api/matches/:matchId/score
+--------------------------------------------------
+Request:
+{
+  "score": 8
+}
+Backend verifies:
+- scoring player is correct player,
+- correct phase,
+- score 1–10,
+- score not previously submitted.
+--------------------------------------------------
+POST /api/matches/:matchId/review
+--------------------------------------------------
+Request accepting score:
+{
+  "flag": false
+}
+or flagging score:
+{
+  "flag": true
+}
+Backend verifies:
+- player is reviewing own received score,
+- review not already completed.
+--------------------------------------------------
+GET /api/matches/:matchId/result
+--------------------------------------------------
+Available when:
+status = ENDED
+Returns:
+- player names,
+- avatars,
+- final scores,
+- winner,
+- questions completed,
+- flag count,
+- end reason.
+================================================================================
+46. API ERROR FORMAT
+================================================================================
+Use one simple format:
+{
+  "error": "Human-readable message"
+}
+Recommended status codes:
+200 OK
+201 Created
+400 Invalid request
+401 Invalid session
+403 Action not permitted
+404 Not found
+409 Invalid match state
+500 Server error
+Do not expose stack traces to the frontend.
+================================================================================
+47. FRONTEND TECHNOLOGY
+================================================================================
+Use:
+React
+Vite
+JavaScript
+React Router
+plain CSS
+Do NOT use:
+Redux
+MobX
+Zustand
+Tailwind unless already configured
+large UI libraries
+complex form libraries
+GraphQL
+React state is sufficient.
+================================================================================
+48. FRONTEND STRUCTURE
+================================================================================
+frontend/
+|
+|-- src/
+|   |
+|   |-- pages/
+|   |   |-- WelcomePage.jsx
+|   |   |-- PoolPage.jsx
+|   |   |-- MatchPage.jsx
+|   |   |-- ResultPage.jsx
+|   |
+|   |-- components/
+|   |   |-- AvatarPicker.jsx
+|   |   |-- InterestPicker.jsx
+|   |   |-- ScorePicker.jsx
+|   |
+|   |-- api/
+|   |   |-- api.js
+|   |
+|   |-- assets/
+|   |   |-- avatars/
+|   |
+|   |-- App.jsx
+|   |-- main.jsx
+|   |-- styles.css
+|
+|-- tests/
+|-- package.json
+|-- Dockerfile
+Keep component count low.
+================================================================================
+49. FRONTEND ROUTES
+================================================================================
+/                   Welcome
+/pool               Pool
+/match/:matchId     Match
+/result/:matchId    Result
+No other user-facing routes.
+================================================================================
+50. UI DESIGN REQUIREMENTS
+================================================================================
+Visual design is intentionally simple.
+Requirements:
+- clean,
+- readable,
+- mobile-first,
+- consistent spacing,
+- clear buttons,
+- obvious current action,
+- obvious waiting state,
+- sufficient contrast,
+- readable typography.
+Recommended maximum content width:
+480 px.
+Desktop layout:
+center mobile-style application container.
+No complex animations.
+No custom design system required.
+No advanced responsive layouts.
+================================================================================
+51. REFRESH BEHAVIOR
+================================================================================
+sessionStorage allows the application to survive:
+page refresh.
+After refresh:
+- read playerId,
+- read sessionToken,
+- request current server state,
+- route user to appropriate screen.
+sessionStorage does NOT need to survive:
+complete browser session termination.
+This behavior is acceptable for the academic MVP.
+================================================================================
+52. POLLING
+================================================================================
+Pool:
+GET /api/pool/status every approximately 1000 ms.
+Match:
+GET /api/matches/:matchId every approximately 1000 ms.
+Stop polling when component unmounts.
+Stop match polling when match ends.
+Do NOT poll faster than necessary.
+================================================================================
+53. SECURITY OBJECTIVE
+================================================================================
+Security level:
+MODERATE / DEMONSTRATION-APP APPROPRIATE.
+The application is not production software.
+Security controls exist only to demonstrate responsible software development and prevent
+obvious vulnerabilities.
+================================================================================
+54. REQUIRED SECURITY CONTROLS
+================================================================================
+SEC-01
+All SQL queries MUST use parameterized queries.
+Never concatenate user input into SQL.
+SEC-02
+Backend MUST validate all input.
+SEC-03
+Display name length MUST be enforced server-side.
+SEC-04
+Exactly three valid interest IDs MUST be enforced server-side.
+SEC-05
+Avatar ID range MUST be validated server-side.
+SEC-06
+Answer length MUST be validated server-side.
+SEC-07
+Score range 1–10 MUST be validated server-side.
+SEC-08
+Current match phase MUST be checked before accepting gameplay actions.
+SEC-09
+Session token MUST be checked for player-owned operations.
+SEC-10
+Use Helmet basic Express security headers.
+SEC-11
+Configure CORS only for the frontend origin used by the application.
+SEC-12
+Use:
+express.json({ limit: "10kb" })
+or another small request-body limit.
+SEC-13
+Database credentials MUST be provided through environment variables.
+SEC-14
+.env MUST NOT be committed.
+Provide:
+.env.example
+SEC-15
+Frontend must not display raw backend stack traces.
+================================================================================
+55. SECURITY FEATURES NOT REQUIRED
+================================================================================
+Do NOT implement:
+- password hashing
+- MFA
+- OAuth
+- access tokens
+- refresh tokens
+- account lockout
+- CAPTCHA
+- WAF
+- encryption-at-rest management
+- secret rotation
+- penetration testing infrastructure
+- SIEM
+- audit-log infrastructure
+- advanced rate limiting
+- production abuse detection
+================================================================================
+56. REAL-TIME SECURITY LIMITATION
+================================================================================
+Because this is an anonymous academic prototype:
+A motivated technical user could potentially manipulate browser requests.
+Production-grade cheat prevention is not a project requirement.
+The backend should nevertheless enforce turn order and score rules.
+This is sufficient for the intended demonstration.
+================================================================================
+57. TESTING STRATEGY
+================================================================================
+Testing objective:
+Demonstrate that core application functionality is appropriately covered.
+Testing objective is NOT:
+maximum coverage.
+Recommended tools:
+Frontend:
+Vitest
+React Testing Library
+Backend:
+Vitest
+Supertest
+No Cypress.
+No Playwright.
+No load testing.
+No security scanning pipeline.
+No performance suite.
+================================================================================
+58. MINIMUM BACKEND TEST SET
+================================================================================
+BT-01
+Valid temporary player can be created.
+BT-02
+Player creation rejects invalid profile.
+BT-03
+Matchmaking prefers three shared interests.
+BT-04
+Matchmaking selects two shared interests when no three-interest candidate exists.
+BT-05
+Matchmaking selects one shared interest when no better candidate exists.
+BT-06
+Players with zero shared interests are not matched.
+BT-07
+Wrong player cannot submit an answer during another player's phase.
+BT-08
+Score outside 1–10 is rejected.
+BT-09
+Valid score advances match phase.
+BT-10
+Flagging score increments match flag count.
+BT-11
+Third flag ends match.
+BT-12
+Completing question 10 ends match.
+BT-13
+Result calculation excludes flagged scores.
+BT-14
+Higher valid average determines winner.
+================================================================================
+59. MINIMUM FRONTEND TEST SET
+================================================================================
+FT-01
+Welcome screen renders.
+FT-02
+Continue is unavailable until valid profile exists.
+FT-03
+Interest picker permits exactly three selections.
+FT-04
+Pool screen displays waiting state.
+FT-05
+Pool redirects when match ID is returned.
+FT-06
+Match screen renders current question.
+FT-07
+Correct gameplay control is shown for current phase.
+FT-08
+Result screen displays player result and winner.
+Approximately 20–22 focused tests across frontend and backend are more than sufficient
+for this MVP.
+Do not create hundreds of tests.
+================================================================================
+60. TESTING NOT REQUIRED
+================================================================================
+Do NOT implement:
+- load tests
+- stress tests
+- soak tests
+- browser matrix testing
+- chaos testing
+- penetration testing
+- mutation testing
+- visual regression testing
+- contract testing platform
+- production performance testing
+================================================================================
+61. CODE DOCUMENTATION
+================================================================================
+The university requires appropriate code documentation.
+For this MVP, appropriate documentation means:
+- clear filenames,
+- clear function names,
+- comments where business logic is not obvious,
+- JSDoc for important service functions,
+- README,
+- architecture documentation,
+- API summary,
+- database schema explanation.
+Do NOT comment obvious statements.
+Example function requiring documentation:
+calculateInterestOverlap()
+createMatch()
+advanceMatch()
+calculateResult()
+================================================================================
+62. DOCKER REQUIREMENT
+================================================================================
+The complete application MUST run using Docker Compose.
+Three services:
+frontend
+backend
+database
+Architecture:
++------------------+
+| React frontend   |
+| port 5173        |
++--------+---------+
+         |
+         | HTTP / JSON
+         v
++------------------+
+| Node / Express   |
+| port 3001        |
++--------+---------+
+         |
+         | SQL
+         v
++------------------+
+| PostgreSQL       |
+| port 5432        |
++------------------+
+================================================================================
+63. FRONTEND DOCKER STRATEGY
+================================================================================
+Because this is a university demonstration system rather than production infrastructure,
+the frontend may run inside a Node container using the Vite server.
+Example concept:
+node:alpine
+npm install
+npm run dev -- --host 0.0.0.0
+This avoids requiring an additional Nginx configuration.
+Production web-serving optimization is explicitly out of scope.
+================================================================================
+64. BACKEND DOCKER STRATEGY
+================================================================================
+Use:
+node:alpine
+Process:
+npm install
+npm start
+Environment variables:
+PORT
+DATABASE_URL
+FRONTEND_ORIGIN
+================================================================================
+65. DATABASE DOCKER STRATEGY
+================================================================================
+Use official PostgreSQL image.
+Environment:
+POSTGRES_DB
+POSTGRES_USER
+POSTGRES_PASSWORD
+Mount initialization files:
+database/schema.sql
+database/seed.sql
+Database initializes automatically when volume is first created.
+================================================================================
+66. DOCKER COMPOSE COMMAND
+================================================================================
+The expected primary startup command is:
+docker compose up --build
+After startup:
+Frontend:
+http://localhost:5173
+Backend:
+http://localhost:3001
+Health check:
+http://localhost:3001/api/health
+No additional manual application startup should be necessary.
+================================================================================
+67. REPOSITORY STRUCTURE
+================================================================================
+minduel-lite/
+|
+|-- frontend/
+|   |-- src/
+|   |-- tests/
+|   |-- Dockerfile
+|   |-- package.json
+|
+|-- backend/
+|   |-- src/
+|   |-- tests/
+|   |-- Dockerfile
+|   |-- package.json
+|
+|-- database/
+|   |-- schema.sql
+|   |-- seed.sql
+|
+|-- docs/
+|   |-- concept.md
+|   |-- architecture.md
+|   |-- wireframes.md
+|
+|-- docker-compose.yml
+|-- .env.example
+|-- .gitignore
+|-- README.md
+================================================================================
+68. WRITTEN CONCEPT
+================================================================================
+docs/concept.md should include:
+1. Project title
+2. Problem statement
+3. Target users
+4. User benefit
+5. Project objective
+6. Functional requirements
+7. Non-functional requirements
+8. Scope
+9. Explicit exclusions
+10. User flow
+11. Four wireframes
+12. Technology choices
+13. Process model
+14. Architecture
+15. Database model
+16. Testing approach
+17. Critical limitations
+This satisfies the need for a clear conceptual basis for implementation.
+================================================================================
+69. SOFTWARE ARCHITECTURE DOCUMENTATION
+================================================================================
+Use ONE architecture notation.
+Recommended:
+C4 Container Diagram.
+Only show:
+User
+  |
+  v
+React SPA
+  |
+  v
+Node.js/Express API
+  |
+  v
+PostgreSQL
+Do NOT create:
+- microservice diagrams,
+- deployment cloud architecture,
+- Kubernetes diagrams,
+- complex sequence architecture.
+One C4 container diagram is enough for architecture overview.
+================================================================================
+70. ADDITIONAL USEFUL DIAGRAM
+================================================================================
+Create one simple ER diagram showing:
+players
+queue_entries
+matches
+match_rounds
+questions
+This makes database design easy to explain during presentation.
+================================================================================
+71. WIREFRAMES
+================================================================================
+Only four wireframes are required for this project concept.
+WIREFRAME 1 — WELCOME
+--------------------------------
+Minduel Lite
+Choose your name
+[________________]
+Choose avatar
+○ ○ ○ ○
+○ ○ ○ ○
+○ ○ ○ ○
+Choose exactly 3 interests
+[Technology] [AI]
+[Science]    [History]
+[... 32 total ...]
+Selected 3 / 3
+[ENTER POOL]
+--------------------------------
+
+WIREFRAME 2 — POOL
+--------------------------------
+Finding an opponent...
+       [avatar]
+Neo
+Technology
+Science
+Philosophy
+Searching...
+[Cancel]
+--------------------------------
+
+WIREFRAME 3 — MATCH
+--------------------------------
+Neo             Alex
+Avatar          Avatar
+Question 4 / 10
+"Should technological progress
+always be considered beneficial?"
+[Answer / waiting / score UI]
+Flags: 1 / 3
+--------------------------------
+
+WIREFRAME 4 — RESULT
+--------------------------------
+MATCH COMPLETE
+Neo
+7.8
+Alex
+6.9
+WINNER
+NEO
+Questions completed: 10
+Flags: 1
+[PLAY AGAIN]
+[RESET PROFILE]
+[EXIT]
+--------------------------------
+================================================================================
+72. FUNCTIONAL REQUIREMENTS
+================================================================================
+FR-001
+The application shall allow a user to enter a temporary display name.
+FR-002
+The application shall allow a user to select one predefined avatar.
+FR-003
+The application shall require exactly three predefined interests.
+FR-004
+The application shall create a temporary anonymous player session.
+FR-005
+The application shall allow the player to enter the matchmaking pool.
+FR-006
+The system shall compare waiting users according to shared interests.
+FR-007
+The system shall prioritize 3 shared interests over 2, and 2 over 1.
+FR-008
+The system shall not match users with zero shared interests.
+FR-009
+The system shall create a two-player match.
+FR-010
+The system shall randomly select one predefined 10-question competition.
+FR-011
+Both players shall receive the same question.
+FR-012
+Player 1 shall answer first.
+FR-013
+Player 2 shall score Player 1's answer.
+FR-014
+Player 2 shall then answer.
+FR-015
+Player 1 shall score Player 2's answer.
+FR-016
+Scores shall be integers from 1 through 10.
+FR-017
+Each player shall be able to flag the score received from the opponent.
+FR-018
+A flagged score shall be excluded from final score calculation.
+FR-019
+Three total flagged scores shall terminate the match immediately.
+FR-020
+A normally completed match shall contain ten questions.
+FR-021
+The system shall calculate each player's valid average score.
+FR-022
+The system shall determine a winner or draw.
+FR-023
+The result screen shall display the scores and winner.
+FR-024
+The user shall be able to enter matchmaking again after completion.
+FR-025
+The user shall be able to reset the temporary profile.
+================================================================================
+73. NON-FUNCTIONAL REQUIREMENTS
+================================================================================
+NFR-001
+The frontend shall be implemented as a React SPA.
+NFR-002
+The backend shall be implemented with Node.js and Express.
+NFR-003
+Persistent runtime state shall use PostgreSQL.
+NFR-004
+Frontend/backend communication shall use REST and JSON.
+NFR-005
+The application shall be runnable locally through Docker Compose.
+NFR-006
+The interface shall be usable on a mobile-width browser.
+NFR-007
+Core functionality shall have automated tests.
+NFR-008
+The codebase shall contain appropriate documentation.
+NFR-009
+Gameplay actions shall be validated by the backend.
+NFR-010
+SQL queries shall be parameterized.
+NFR-011
+The application shall operate using two separate browser sessions on one computer.
+NFR-012
+The system is optimized for functional correctness and demonstration rather than scale.
+================================================================================
+74. DEMONSTRATION ENVIRONMENT
+================================================================================
+Recommended demonstration:
+Browser Window A:
+normal Chrome window
+Browser Window B:
+Chrome Incognito
+Both connect to:
+http://localhost:5173
+Example:
+Player A:
+Neo
+Technology
+Science
+Philosophy
+Player B:
+Alex
+Technology
+Science
+History
+Overlap:
+Technology
+Science
+Similarity:
+2 / 3
+Backend creates match.
+This visibly demonstrates:
+- two browser clients,
+- shared backend,
+- database,
+- matchmaking,
+- synchronized match state.
+================================================================================
+75. LOCAL OPERATIONAL REQUIREMENT
+================================================================================
+Internet hosting is NOT required by this project specification.
+The application need only operate reliably locally for demonstration.
+All components should execute on the student's computer using Docker Compose.
+No AWS.
+No Azure.
+No Firebase.
+No Render.
+No Vercel.
+No Cloudflare deployment.
+No managed PostgreSQL.
+================================================================================
+76. DEVELOPMENT PROCESS MODEL
+================================================================================
+Selected process:
+ITERATIVE-INCREMENTAL DEVELOPMENT MANAGED WITH KANBAN.
+Reason:
+The project:
+- is developed by one person,
+- has a small fixed MVP,
+- has a short development period,
+- benefits from continuous task flow,
+- does not require team Scrum ceremonies.
+Kanban provides sufficient project organization with minimal administrative overhead.
+Board columns:
+BACKLOG
+READY
+IN PROGRESS
+TEST
+DONE
+================================================================================
+77. DEVELOPMENT PHASES
+================================================================================
+PHASE 1 — CONCEPT
+Deliver:
+- problem definition
+- target user
+- benefits
+- scope
+- requirements
+- wireframes
+- architecture
+- database model
+PHASE 2 — FOUNDATION
+Deliver:
+- repository
+- React application
+- Express application
+- PostgreSQL
+- Docker Compose
+- health endpoint
+PHASE 3 — PROFILE + MATCHMAKING
+Deliver:
+- Welcome
+- profile creation
+- interests
+- Pool
+- matchmaking algorithm
+PHASE 4 — MATCH
+Deliver:
+- question loading
+- match state machine
+- answers
+- scoring
+- score review
+- flag termination
+- 10-question completion
+PHASE 5 — RESULT
+Deliver:
+- score calculation
+- winner
+- result screen
+- replay
+- reset
+PHASE 6 — SUBMISSION HARDENING
+Deliver:
+- tests
+- code documentation
+- README
+- diagrams
+- clean Docker startup
+- GitHub publication
+PHASE 7 — ORAL REPORT MATERIAL
+Deliver:
+- screenshots
+- code excerpts
+- process evidence
+- presentation
+- critical evaluation
+================================================================================
+78. ESTIMATED DEVELOPMENT TIME
+================================================================================
+These are planning estimates, not university requirements.
+Concept + diagrams:
+2–3 hours
+Project foundation + Docker:
+2–3 hours
+Welcome frontend:
+2 hours
+Pool + matchmaking:
+3–4 hours
+Match state machine:
+4–6 hours
+Match frontend:
+3–4 hours
+Results:
+1–2 hours
+Testing:
+3–4 hours
+Documentation:
+2–3 hours
+Final verification:
+1–2 hours
+Expected application + submission preparation:
+approximately 20–30 focused hours.
+Live audio would materially increase this estimate and is therefore excluded.
+================================================================================
+79. RESOURCE PLAN
+================================================================================
+Required resources:
+- development computer
+- code editor
+- Node.js
+- Docker Desktop
+- Git
+- GitHub
+- browser
+- PostgreSQL Docker image
+- React
+- Express
+- testing libraries
+- presentation software
+Direct software cost:
+$0 using free/open-source tools.
+No paid infrastructure is required.
+================================================================================
+80. RISK ANALYSIS
+================================================================================
+Only project-relevant risks should be documented.
+RISK 1
+Matchmaking state becomes inconsistent.
+Mitigation:
+backend owns matchmaking state and queue player IDs are unique.
+RISK 2
+Players perform actions out of order.
+Mitigation:
+backend validates current match phase.
+RISK 3
+Two browser windows fail to synchronize.
+Mitigation:
+poll server every approximately one second.
+RISK 4
+Database is not initialized correctly.
+Mitigation:
+schema.sql and seed.sql initialize database through Docker.
+RISK 5
+Application fails during presentation.
+Mitigation:
+run complete Docker demonstration before recording and use a stable local environment.
+RISK 6
+Scope grows unnecessarily.
+Mitigation:
+this knowledge base defines explicit exclusions.
+================================================================================
+81. ACCEPTANCE CRITERIA
+================================================================================
+The software MVP is operational when the following scenario succeeds.
+AC-01
+docker compose up --build successfully starts frontend, backend and database.
+AC-02
+Welcome page loads.
+AC-03
+Player A can create a profile.
+AC-04
+Player B can create a profile in a second browser session.
+AC-05
+Both can enter pool.
+AC-06
+Compatible players are matched.
+AC-07
+Both browsers enter the same match.
+AC-08
+Both see the same question.
+AC-09
+Player 1 submits answer.
+AC-10
+Player 2 scores Player 1.
+AC-11
+Player 2 submits answer.
+AC-12
+Player 1 scores Player 2.
+AC-13
+Both can accept or flag received scores.
+AC-14
+The next question loads.
+AC-15
+The sequence can continue through question 10.
+AC-16
+Question 10 completion creates result.
+AC-17
+Three flags cause immediate result.
+AC-18
+Final scores exclude flagged scores.
+AC-19
+Winner is correctly displayed.
+AC-20
+Play Again returns user to pool.
+AC-21
+Reset Profile returns user to Welcome.
+AC-22
+Core automated tests pass.
+AC-23
+Application is documented.
+AC-24
+GitHub repository contains complete code.
+================================================================================
+82. DEFINITION OF DONE — UNIVERSITY PROJECT
+================================================================================
+PROJECT IS DONE ONLY WHEN:
+[ ] React SPA implemented
+[ ] Node.js backend implemented
+[ ] PostgreSQL implemented
+[ ] four screens implemented
+[ ] matchmaking operational
+[ ] 10-question competition operational
+[ ] peer scoring operational
+[ ] flags operational
+[ ] result calculation operational
+[ ] Play Again operational
+[ ] Reset Profile operational
+[ ] tests exist and pass
+[ ] frontend documented
+[ ] backend documented
+[ ] database documented
+[ ] architecture documented
+[ ] wireframes documented
+[ ] process model documented and justified
+[ ] Dockerfiles created
+[ ] Docker Compose created
+[ ] docker compose up --build works
+[ ] README contains setup/run instructions
+[ ] GitHub repository created
+[ ] GitHub link ready for presentation title slide
+[ ] project result critically evaluated
+[ ] presentation prepared
+[ ] presentation converted to PDF
+================================================================================
+83. README REQUIREMENTS
+================================================================================
+README.md should contain only useful project information.
+Recommended structure:
+# Minduel Lite
+## Project Overview
+## Features
+## Technology Stack
+## Architecture
+## Prerequisites
+## Running the Application
+docker compose up --build
+## Application URLs
+## Running Tests
+## Database
+## Project Structure
+## Known Limitations
+No enormous documentation website is required.
+================================================================================
+84. IMPLEMENTATION EXCERPTS TO PREPARE FOR PRESENTATION
+================================================================================
+The oral report should contain selected code excerpts rather than attempting to explain
+the whole codebase.
+Recommended excerpts:
+EXCERPT 1
+Profile validation.
+Demonstrates:
+input processing.
+EXCERPT 2
+Interest overlap / matchmaking function.
+Demonstrates:
+business logic.
+EXCERPT 3
+Match phase transition.
+Demonstrates:
+application state.
+EXCERPT 4
+Score flag / match termination.
+Demonstrates:
+business rules.
+EXCERPT 5
+React polling/navigation logic.
+Demonstrates:
+frontend/backend interaction.
+EXCERPT 6
+Parameterized SQL query.
+Demonstrates:
+database integration and basic security.
+================================================================================
+85. ORAL PROJECT REPORT CONTENT
+================================================================================
+The project presentation should explain the PROJECT PROCESS rather than simply showing
+screens.
+Suggested presentation structure:
+SLIDE 1
+Title
+Student details
+Project title
+GitHub repository link
+SLIDE 2
+Problem and project objective
+SLIDE 3
+Target user, benefit and MVP scope
+SLIDE 4
+Requirements and explicit scope reduction
+SLIDE 5
+Process model and development phases
+SLIDE 6
+Wireframes and user journey
+SLIDE 7
+Software architecture
+SLIDE 8
+Database / data model
+SLIDE 9
+Matchmaking algorithm
+SLIDE 10
+Match state machine and implementation excerpts
+SLIDE 11
+Testing and Docker
+SLIDE 12
+Operational demonstration / screenshots
+SLIDE 13
+Results, objective achievement and limitations
+SLIDE 14
+Reflection, lessons learned and possible improvements
+SLIDE 15
+Conclusion
+Then where required:
+List of figures
+Bibliography
+================================================================================
+86. PRESENTATION TIME TARGET
+================================================================================
+Total:
+approximately 15 minutes.
+Suggested allocation:
+Problem + objective:
+1 minute
+Requirements + scope:
+1 minute
+Planning/process:
+1.5 minutes
+Wireframes + architecture:
+2 minutes
+Database + matchmaking:
+2 minutes
+Implementation:
+2 minutes
+Operational demonstration:
+2–3 minutes
+Testing:
+1 minute
+Evaluation + reflection:
+1.5 minutes
+Conclusion:
+0.5 minute
+Avoid attempting to manually play all ten questions during the presentation.
+A live demonstration only needs to show enough interaction to prove the operational
+full-stack flow.
+Screenshots may show later match/result states.
+================================================================================
+87. PRESENTATION VISUAL EVIDENCE
+================================================================================
+Prepare screenshots of:
+1. Welcome
+2. Pool
+3. Match
+4. Result
+5. Kanban/project process
+6. passing tests
+7. Docker containers running
+Prepare diagrams:
+1. C4 container architecture
+2. ER diagram
+3. simple user flow or state diagram
+External graphics or materials used in the presentation must be appropriately cited.
+Original diagrams produced specifically for the project should be clearly identified as
+the student's own work where appropriate.
+================================================================================
+88. CRITICAL EVALUATION
+================================================================================
+The project MUST NOT pretend to be production ready.
+Critical evaluation should explicitly acknowledge that the design intentionally prioritizes
+submission efficiency.
+Known limitations include:
+- no permanent accounts,
+- no user authentication,
+- no disconnect recovery,
+- no production moderation,
+- anonymous identities,
+- simple interest matching,
+- polling rather than WebSockets,
+- subjective peer scoring,
+- no abuse prevention,
+- no persistent history UI,
+- static question bank,
+- no audio,
+- no cloud deployment,
+- one backend instance,
+- basic security only,
+- no production scalability strategy.
+These are acceptable because they are outside the defined project goal.
+================================================================================
+89. POSSIBLE FUTURE IMPROVEMENTS
+================================================================================
+Future improvements may be DISCUSSED but MUST NOT be implemented unless time is
+abundant.
+Examples:
+- authenticated accounts,
+- persistent profiles,
+- friend system,
+- live WebRTC audio,
+- WebSocket synchronization,
+- smarter matchmaking,
+- topic-based question selection,
+- moderation,
+- rankings,
+- match history,
+- scalable cloud deployment,
+- stronger security.
+Mentioning these demonstrates critical reflection.
+Implementing them would unnecessarily increase the MVP scope.
+================================================================================
+90. LESSONS-LEARNED THEMES
+================================================================================
+Potential reflection points for the final presentation:
+- MVP scope reduction reduces delivery risk.
+- Backend-authoritative state simplifies multiplayer consistency.
+- Polling can be appropriate when system scale is intentionally small.
+- Simple relational data structures are sufficient for turn-based interaction.
+- A 32-dimensional binary interest model can produce useful matching without machine
+  learning.
+- Containerization improves reproducibility.
+- Automated tests are most valuable when focused on core business rules.
+- Architectural simplicity can be a deliberate engineering decision rather than a
+  limitation.
+Only claim lessons that actually reflect the completed development experience.
+================================================================================
+91. PROJECT SUCCESS DEFINITION
+================================================================================
+The project succeeds if:
+Two anonymous browser users can independently create temporary profiles, select three
+interests, enter a matchmaking pool, be paired according to interest overlap, participate
+in a synchronized ten-question peer-scored competition, flag received scores, trigger
+normal or three-flag termination, view the winner and either play again or reset their
+temporary profile.
+The system must operate using:
+React
++
+Node.js / Express
++
+PostgreSQL
+and run locally through:
+Docker Compose.
+================================================================================
+92. ARCHITECTURAL PRINCIPLE
+================================================================================
+The project's engineering rule is:
+USE THE SIMPLEST IMPLEMENTATION THAT SATISFIES THE DEFINED REQUIREMENT.
+Examples:
+Use REST instead of GraphQL.
+Use polling instead of WebSockets.
+Use PostgreSQL arrays instead of an interest join table.
+Use direct SQL instead of an ORM.
+Use four screens instead of a large navigation structure.
+Use anonymous sessions instead of accounts.
+Use static avatars instead of uploads.
+Use seeded questions instead of question administration.
+Use one backend instead of microservices.
+Use local Docker instead of cloud infrastructure.
+Use peer scores instead of AI evaluation.
+================================================================================
+93. SCOPE CHANGE RULE
+================================================================================
+Before adding any feature, ask:
+1. Is it explicitly required by IU?
+OR
+2. Is it necessary for one of the acceptance criteria?
+If both answers are NO:
+DO NOT IMPLEMENT IT.
+================================================================================
+94. FINAL AUTHORITATIVE MVP
+================================================================================
+Minduel Lite consists of exactly this essential experience:
+WELCOME
+------------------------------------------------
+Name
++
+Avatar
++
+3 of 32 interests
+                    |
+                    v
+POOL
+------------------------------------------------
+Find the currently available player with:
+3 shared interests
+otherwise 2
+otherwise 1
+                    |
+                    v
+MATCH
+------------------------------------------------
+10 predefined questions.
+For every question:
+P1 answers
+P2 scores P1
+P2 answers
+P1 scores P2
+both review received scores
+Flagged score = struck.
+3 total flags = immediate termination.
+                    |
+                    v
+RESULT
+------------------------------------------------
+Calculate valid average scores.
+Display:
+Player 1 score
+Player 2 score
+Winner / Draw
+Actions:
+Play Again
+Reset Profile
+Exit
+================================================================================
+95. FINAL TECHNOLOGY BASELINE
+================================================================================
+FRONTEND
+React
+Vite
+JavaScript
+React Router
+plain CSS
+Vitest
+React Testing Library
+
+BACKEND
+Node.js
+Express
+pg
+cors
+helmet
+dotenv
+Vitest
+Supertest
+
+DATABASE
+PostgreSQL
+schema.sql
+seed.sql
+
+RUNTIME SYNCHRONIZATION
+REST
+1-second polling
+
+INFRASTRUCTURE
+Docker
+Docker Compose
+
+PROJECT DOCUMENTATION
+README
+Concept
+Wireframes
+C4 architecture diagram
+ER diagram
+Tests
+Critical evaluation
+
+NOT INCLUDED
+Authentication accounts
+WebSockets
+WebRTC
+LiveKit
+Audio
+Cloud infrastructure
+Production systems
+
+================================================================================
+END OF KNOWLEDGE BASE
+================================================================================
