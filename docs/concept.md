@@ -1,12 +1,18 @@
-# Minduel Lite — Written Concept (as built)
+# Minduel Lite — Written Concept (as built — text-answer MVP)
 
-This document describes the **implemented** academic MVP.  
-Detailed rules remain in `docs/MinduelLite-Knowledge-Base-KB.txt`.
+> **Specification status**  
+> This concept document describes the **completed text-answer** application that was frozen on branch `safety/text-answer-mvp` (tag `text-answer-mvp-complete`).  
+> The **authoritative build specification is now Knowledge Base V2.0** (`docs/MinduelLite-Knowledge-Base-KB.txt`), which requires **LiveKit live audio** and supersedes V1.0 rules that treated audio as out of scope and answers as text.  
+> Keep this file for oral-report history and comparison; do not treat text-only answers as the current product goal.
+
+This document describes the **implemented text-answer** academic MVP.  
+**Current rules:** `docs/MinduelLite-Knowledge-Base-KB.txt` (**V2.0**).  
+**Archived V1.0:** `docs/archive/knowledge-base-v1.0-text-answers/`.
 
 **Process:** Iterative-Incremental Development managed with Kanban  
 (see `docs/process-model.md`, `docs/kanban-board.md`).
 
-**Status:** Operational full-stack application; local run via `docker compose up --build`.
+**Status (text MVP):** Operational full-stack application; local run via `docker compose up --build`.
 
 ---
 

@@ -6,13 +6,17 @@ Minduel Lite is a mobile-first full-stack web application for short, anonymous, 
 
 Users create a temporary profile (display name, avatar, three interests), enter a matchmaking pool, and play a ten-question peer-scored duel against a compatible opponent. There are no permanent accounts, chat, rankings, or cloud deployment.
 
-Authoritative product rules: `docs/MinduelLite-Knowledge-Base-KB.txt`.
+**Authoritative product rules (Knowledge Base V2.0):**  
+`docs/MinduelLite-Knowledge-Base-KB.txt` (also at root: `MinduelLite Knowledge Base KB.txt`).
+
+V2.0 specifies a **live-audio** competition (LiveKit). The previously completed **text-answer** build is preserved on branch `safety/text-answer-mvp` (tag `text-answer-mvp-complete`); V1.0 text-only KB is under `docs/archive/knowledge-base-v1.0-text-answers/`.
 
 ## Features
 
 - Temporary anonymous profile (name, one of 12 avatars, exactly 3 of 32 interests)
 - Interest-based matchmaking (prefer 3 shared interests, then 2, then 1; never 0)
-- Synchronized ten-question match with turn-based answering and peer scoring (1–10)
+- Synchronized ten-question match with peer scoring (1–10) and score review / flags
+- **Target (KB V2.0):** live spoken interaction via LiveKit during the match (text-answer MVP frozen on `safety/text-answer-mvp`)
 - Accept or flag received scores; three combined flags end the match early
 - Final average of non-flagged scores; winner or draw
 - Play again (same temporary profile) or reset profile

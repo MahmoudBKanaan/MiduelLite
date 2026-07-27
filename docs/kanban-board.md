@@ -54,7 +54,7 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 | ID | Task | Notes |
 |----|------|-------|
 | D-01 | Project root + documentation folder structure | `MinduelLite/` |
-| D-02 | Knowledge Base saved under `docs/` as authoritative spec | `docs/MinduelLite-Knowledge-Base-KB.*` |
+| D-02 | Knowledge Base saved under `docs/` as authoritative spec | `docs/MinduelLite-Knowledge-Base-KB.*` (**V2.0** current; V1.0 archived under `docs/archive/`) |
 | D-03 | Written concept (`docs/concept.md`) | Title, problem, users, FR/NFR, exclusions, tech, tests, limits |
 | D-04 | Four wireframes | `docs/wireframes.md` |
 | D-05 | C4 container architecture | `docs/architecture.md` |

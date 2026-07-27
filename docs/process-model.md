@@ -37,7 +37,7 @@ Work is visualised on a board and pulled left-to-right. There are **no Scrum spr
 | Reason | Explanation |
 |--------|-------------|
 | **Solo project** | One developer; team events (sprint planning, retrospectives as meetings) add little value. |
-| **Small fixed MVP** | Scope is locked by the Knowledge Base (four screens, explicit exclusions). Kanban tracks flow without inventing new scope. |
+| **Small fixed MVP** | Scope is locked by the **current** Knowledge Base (**V2.0**, live-audio MVP). Kanban tracks flow without inventing new scope beyond that spec. |
 | **Short development period** | Continuous pull of ready tasks fits a compressed university timeline better than multi-week sprints. |
 | **Minimal administrative overhead** | Five columns and a practical task set; no heavy tool bureaucracy or hundreds of tickets. |
 
@@ -66,7 +66,7 @@ Board location: `docs/kanban-board.md`
 
 - Prefer **one major feature** in **IN PROGRESS** at a time.  
 - Move to **TEST** before starting the next major slice.  
-- Do **not** add features outside the Knowledge Base.
+- Do **not** add features outside Knowledge Base **V2.0** (`docs/MinduelLite-Knowledge-Base-KB.txt`).
 
 ---
 

@@ -1,7 +1,9 @@
 # Software Architecture — C4 Container Diagram (final)
 
 **Notation:** C4 Model — **Container** level only.  
-**System:** Minduel Lite (as implemented).
+**System:** Minduel Lite (**text-answer MVP as implemented** on branch `safety/text-answer-mvp`).
+
+> **V2.0 note:** Knowledge Base **Version 2.0** adds a **LiveKit** live-audio path (browser ↔ LiveKit cloud/self-host) while keeping REST polling for game state. This diagram still documents the shipped text MVP. Update containers when the audio refactor lands. Authoritative rules: `docs/MinduelLite-Knowledge-Base-KB.txt` (V2.0).
 
 ---
 
@@ -174,12 +176,14 @@ Implementation: `submitAnswer`, `submitScore`, `submitReview`, `advanceMatch()`,
 
 ---
 
-## Architectural decisions (implemented)
+## Architectural decisions
 
-| ID | Decision |
-|----|----------|
-| ADR-001 | No live audio / WebRTC |
-| ADR-002 | Short polling instead of WebSockets |
-| ADR-003 | Backend is authoritative for game state |
-| ADR-004 | Temporary session headers, not account login |
-| ADR-005 | Direct SQL via `pg`, no ORM |
+| ID | Text MVP (implemented / frozen) | Knowledge Base V2.0 (authoritative going forward) |
+|----|----------------------------------|-----------------------------------------------------|
+| ADR-001 | No live audio / WebRTC (V1) | **Live spoken interaction via LiveKit** (browser mic audio; server issues tokens only) |
+| ADR-002 | Short polling instead of WebSockets | Unchanged for **gameplay state**; LiveKit handles **media**, not turn logic |
+| ADR-003 | Backend is authoritative for game state | Unchanged |
+| ADR-004 | Temporary session headers, not account login | Unchanged |
+| ADR-005 | Direct SQL via `pg`, no ORM | Unchanged |
+
+V1 ADR-001 (“audio out of scope”) is **archived** with Knowledge Base V1.0 under `docs/archive/`.
