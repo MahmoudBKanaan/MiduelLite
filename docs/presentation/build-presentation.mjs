@@ -427,26 +427,30 @@ function figNote(slide, text, y = 4.95) {
 {
   const s = pres.addSlide();
   s.background = { color: BG };
-  titleBar(s, '6. Evaluation — goal & limitations');
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 0.5, y: 1.1, w: 4.4, h: 3.5,
-    fill: { color: CARD }, rectRadius: 0.08, line: { color: GREEN },
+  titleBar(s, '6. Evaluation — was the goal achieved?');
+  s.addText('Yes — for the defined academic MVP (not production readiness).', {
+    x: 0.5, y: 0.95, w: 9, h: 0.35, fontSize: 15, bold: true, color: GREEN, margin: 0,
   });
-  s.addText('Goal achieved?', {
-    x: 0.7, y: 1.25, w: 4, h: 0.32, fontSize: 15, bold: true, color: GREEN, margin: 0,
+  s.addText('Evidence', {
+    x: 0.5, y: 1.4, w: 4.5, h: 0.28, fontSize: 13, bold: true, color: ACCENT, margin: 0,
   });
-  s.addText('Yes — for the defined academic objective: a reliable local full-stack demonstration of Task 2 requirements (SPA, backend, tests, Docker, documentation), not a commercial product.', {
-    x: 0.7, y: 1.7, w: 4, h: 2.6, fontSize: 13, color: TEXT, margin: 0, valign: 'top',
+  s.addText([
+    { text: 'Two anonymous browser sessions', options: { bullet: true, breakLine: true } },
+    { text: 'Interest matchmaking (3→2→1)', options: { bullet: true, breakLine: true } },
+    { text: '10-question completion + scoring', options: { bullet: true, breakLine: true } },
+    { text: 'Flags → THREE_FLAGS termination', options: { bullet: true, breakLine: true } },
+    { text: 'Results exclude flagged scores', options: { bullet: true, breakLine: true } },
+    { text: 'SPA + API + Postgres integrate', options: { bullet: true, breakLine: true } },
+    { text: 'Docker Compose one-command run', options: { bullet: true, breakLine: true } },
+    { text: 'Automated tests pass (FE + BE)', options: { bullet: true } },
+  ], {
+    x: 0.5, y: 1.7, w: 4.5, h: 3.1, fontSize: 12, color: TEXT, paraSpaceAfter: 3,
   });
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 5.1, y: 1.1, w: 4.4, h: 3.5,
-    fill: { color: CARD }, rectRadius: 0.08, line: { color: LINE },
+  s.addText('Limitations (intentional)', {
+    x: 5.3, y: 1.4, w: 4.2, h: 0.28, fontSize: 13, bold: true, color: MUTED, margin: 0,
   });
-  s.addText('Known limitations (by design)', {
-    x: 5.3, y: 1.25, w: 4, h: 0.32, fontSize: 15, bold: true, color: MUTED, margin: 0,
-  });
-  s.addText('No accounts · no production auth · polling not WebSockets · no disconnect recovery · subjective scoring · no moderation/history/audio · local Docker only · no production scale strategy.', {
-    x: 5.3, y: 1.7, w: 4, h: 2.6, fontSize: 13, color: TEXT, margin: 0, valign: 'top',
+  s.addText('Excluded to protect scope and demo reliability: no accounts/production auth, polling not WebSockets, no disconnect recovery, subjective scoring, no moderation/history/audio, local Docker only, no production scale. Design choices — not unfinished MVP work.', {
+    x: 5.3, y: 1.8, w: 4.2, h: 2.9, fontSize: 12, color: TEXT, margin: 0, valign: 'top',
   });
   footer(s, 14);
 }
