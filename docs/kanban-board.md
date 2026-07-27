@@ -91,6 +91,7 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 | D-15b | README complete (items 167–168) | full sections; compose-only start path |
 | D-15c | Final docs 169–178 | concept, C4, ER, wireframes, notes, lessons |
 | D-16a | Clean final verification (179–186) | down -v, compose up, 1000 Q, tests, smoke |
+| D-16b | GitHub publish (187–191) | commit 897f0cd pushed to MiduelLite |
 | D-13 | Frontend SPA (4 screens, polling, session) | `frontend/` |
 | D-14 | Dockerfiles + Docker Compose | Compose stack defined |
 | D-15 | Automated tests (frontend + backend unit) | Vitest suites |
