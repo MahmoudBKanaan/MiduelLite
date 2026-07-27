@@ -1,4 +1,6 @@
-# Minduel Lite — three services: frontend, backend, database
+# Minduel Lite — three principal services: frontend, backend, database
+# Optional local LiveKit (dev only): docker compose --profile local-audio up --build
+# Submission architecture still targets managed LiveKit Cloud (no LiveKit in default profile).
 services:
   database:
     image: postgres:16-alpine
@@ -25,6 +27,10 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://${POSTGRES_USER:-minduel}:${POSTGRES_PASSWORD:-minduel}@database:5432/${POSTGRES_DB:-minduel}
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      # LiveKit credentials from host .env (Cloud or local --dev server)
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
     ports:
       - "3001:3001"
     depends_on:
@@ -40,6 +46,18 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+
+  # Optional local LiveKit for microphone demos without Cloud keys.
+  # Default `docker compose up` does NOT start this (three app services only).
+  # Dev credentials: LIVEKIT_URL=ws://localhost:7880 KEY=devkey SECRET=secret
+  livekit:
+    profiles: ["local-audio"]
+    image: livekit/livekit-server:latest
+    command: ["--dev", "--bind", "0.0.0.0", "--node-ip", "127.0.0.1"]
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
 
 volumes:
   pgdata:

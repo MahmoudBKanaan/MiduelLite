@@ -53,7 +53,7 @@ If running long: skip deep dive on figures/bibliography (leave on slide for PDF)
 - **C4:** User → React SPA → Express → PostgreSQL; backend authoritative.
 - **ER:** five tables; 1000 questions seeded.
 - **Matchmaking:** `similarity = shared / 3`; priority 3→2→1; zero = no match.
-- **State machine:** phases; three flags or Q10 ends match; mention one code idea (e.g. `resolveAfterBothReviews`) without reading long listings.
+- **State machine:** phases; either player's third personal flag or Q10 ends the match; mixed flag counts do not combine.
 
 ### 8:30–11:00 — Testing, Docker, result (slides 12–13)
 
@@ -91,7 +91,8 @@ If live demo fails: switch immediately to screenshots 192–195 and 198.
 
 ## Pre-recording checklist
 
-- [ ] Student name + matriculation on title slide  
+- [x] Student name on title slide (Mahmoud B. Kanaan); set `IU_MATRICULATION` if needed  
+- [x] GitHub URL: https://github.com/MahmoudBKanaan/MiduelLite  
 - [ ] Docker stack started **before** recording (if demo)  
 - [ ] Incognito + normal Chrome bookmarks to `http://localhost:5173`  
 - [ ] PDF version of slides ready (item 218)  

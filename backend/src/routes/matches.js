@@ -2,17 +2,38 @@ import { Router } from 'express';
 import { requireSession } from '../middleware/session.js';
 import {
   getMatchState,
-  submitAnswer,
+  completeAnswer,
   submitScore,
   submitReview,
   calculateResult,
 } from '../services/matchService.js';
+import { issueMatchAudioToken } from '../services/audioTokenService.js';
 
 const router = Router();
 
 /**
+ * POST /api/matches/:matchId/audio-token
+ * Issue a LiveKit participant JWT for an ACTIVE match participant.
+ * Requires temporary session (X-Player-Id, X-Session-Token).
+ * Response: { token, serverUrl } only — never API secrets.
+ * Tokens/rooms are not stored in PostgreSQL.
+ */
+router.post('/:matchId/audio-token', requireSession, async (req, res, next) => {
+  try {
+    const payload = await issueMatchAudioToken(
+      req.params.matchId,
+      req.player.id,
+      req.player.display_name
+    );
+    res.json(payload);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/matches/:matchId
- * Player-facing match state (names, role, question, phase, answers/scores, flags).
+ * Player-facing match state (names, role, question, phase, completion/scores, flags).
  */
 router.get('/:matchId', requireSession, async (req, res, next) => {
   try {
@@ -24,16 +45,14 @@ router.get('/:matchId', requireSession, async (req, res, next) => {
 });
 
 /**
- * POST /api/matches/:matchId/answer
- * Body: { "answer": "..." }
+ * POST /api/matches/:matchId/answer-complete
+ * Mark spoken answer complete (no request body — LiveKit audio only).
+ * Requires temporary session headers (X-Player-Id, X-Session-Token).
+ * Spoken-turn completion only (empty body). Legacy POST .../answer is not registered.
  */
-router.post('/:matchId/answer', requireSession, async (req, res, next) => {
+router.post('/:matchId/answer-complete', requireSession, async (req, res, next) => {
   try {
-    const state = await submitAnswer(
-      req.params.matchId,
-      req.player.id,
-      req.body?.answer
-    );
+    const state = await completeAnswer(req.params.matchId, req.player.id);
     res.json(state);
   } catch (err) {
     next(err);

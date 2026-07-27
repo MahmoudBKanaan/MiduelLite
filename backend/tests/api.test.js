@@ -130,7 +130,7 @@ describe.skipIf(!hasDb)('Player and matchmaking (DB)', () => {
     expect(calculateInterestOverlap([1, 2, 3], [4, 5, 6])).toBe(0);
   });
 
-  it('BT-07 wrong player cannot submit answer', async () => {
+  it('BT-07 wrong player cannot complete answer', async () => {
     const a = await createPlayer({
       displayName: 'P1',
       avatarId: 1,
@@ -152,10 +152,10 @@ describe.skipIf(!hasDb)('Player and matchmaking (DB)', () => {
     const matchId = m.body.matchId;
     // b is player 2, phase is P1_ANSWER
     const bad = await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set('X-Player-Id', b.body.playerId)
       .set('X-Session-Token', b.body.sessionToken)
-      .send({ answer: 'Nope' });
+      .send({});
     expect(bad.status).toBe(403);
   });
 
@@ -180,10 +180,10 @@ describe.skipIf(!hasDb)('Player and matchmaking (DB)', () => {
       .set('X-Session-Token', b.body.sessionToken);
     const matchId = m.body.matchId;
     await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set('X-Player-Id', a.body.playerId)
       .set('X-Session-Token', a.body.sessionToken)
-      .send({ answer: 'Valid answer text' });
+      .send({});
     const bad = await request(app)
       .post(`/api/matches/${matchId}/score`)
       .set('X-Player-Id', b.body.playerId)
@@ -213,10 +213,10 @@ describe.skipIf(!hasDb)('Player and matchmaking (DB)', () => {
       .set('X-Session-Token', b.body.sessionToken);
     const matchId = m.body.matchId;
     await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set('X-Player-Id', a.body.playerId)
       .set('X-Session-Token', a.body.sessionToken)
-      .send({ answer: 'Answer one' });
+      .send({});
     const scored = await request(app)
       .post(`/api/matches/${matchId}/score`)
       .set('X-Player-Id', b.body.playerId)
@@ -247,48 +247,52 @@ describe.skipIf(!hasDb)('Player and matchmaking (DB)', () => {
       .set('X-Session-Token', b.body.sessionToken);
     const matchId = m.body.matchId;
 
-    async function playRoundBothFlag() {
+    async function playRoundP1Flag() {
       const st = await request(app)
         .get(`/api/matches/${matchId}`)
         .set('X-Player-Id', a.body.playerId)
         .set('X-Session-Token', a.body.sessionToken);
       if (st.body.status === 'ENDED') return st.body;
       await request(app)
-        .post(`/api/matches/${matchId}/answer`)
+        .post(`/api/matches/${matchId}/answer-complete`)
         .set('X-Player-Id', a.body.playerId)
         .set('X-Session-Token', a.body.sessionToken)
-        .send({ answer: 'P1 answer' });
+        .send({});
       await request(app)
         .post(`/api/matches/${matchId}/score`)
         .set('X-Player-Id', b.body.playerId)
         .set('X-Session-Token', b.body.sessionToken)
         .send({ score: 3 });
       await request(app)
-        .post(`/api/matches/${matchId}/answer`)
+        .post(`/api/matches/${matchId}/answer-complete`)
         .set('X-Player-Id', b.body.playerId)
         .set('X-Session-Token', b.body.sessionToken)
-        .send({ answer: 'P2 answer' });
+        .send({});
       await request(app)
         .post(`/api/matches/${matchId}/score`)
         .set('X-Player-Id', a.body.playerId)
         .set('X-Session-Token', a.body.sessionToken)
         .send({ score: 3 });
-      await request(app)
+      const first = await request(app)
         .post(`/api/matches/${matchId}/review`)
         .set('X-Player-Id', a.body.playerId)
         .set('X-Session-Token', a.body.sessionToken)
         .send({ flag: true });
+      if (first.body.status === 'ENDED') return first.body;
       const last = await request(app)
         .post(`/api/matches/${matchId}/review`)
         .set('X-Player-Id', b.body.playerId)
         .set('X-Session-Token', b.body.sessionToken)
-        .send({ flag: true });
+        .send({ flag: false });
       return last.body;
     }
 
-    let body = await playRoundBothFlag(); // +2 flags
-    expect(body.flagCount).toBeGreaterThanOrEqual(2);
-    body = await playRoundBothFlag(); // +2 more but ends at 3
+    let body = await playRoundP1Flag();
+    expect(body.player1FlagCount).toBe(1);
+    expect(body.player2FlagCount).toBe(0);
+    body = await playRoundP1Flag();
+    expect(body.status).toBe('ACTIVE');
+    body = await playRoundP1Flag(); // P1's third flag ends immediately
     expect(body.status).toBe('ENDED');
     expect(body.endReason).toBe('THREE_FLAGS');
   });

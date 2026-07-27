@@ -129,39 +129,41 @@ describe.skipIf(!hasDb)('GET /api/matches/:matchId/result (items 68–69)', () =
     const m = await request(app).post('/api/pool/join').set(hdr(b));
     const matchId = m.body.matchId;
 
-    async function playBothFlag() {
+    async function playP1Flag() {
       const st = await request(app).get(`/api/matches/${matchId}`).set(hdr(a));
       if (st.body.status === 'ENDED') return st.body;
       await request(app)
-        .post(`/api/matches/${matchId}/answer`)
+        .post(`/api/matches/${matchId}/answer-complete`)
         .set(hdr(a))
-        .send({ answer: 'A' });
+        .send({});
       await request(app)
         .post(`/api/matches/${matchId}/score`)
         .set(hdr(b))
         .send({ score: 4 });
       await request(app)
-        .post(`/api/matches/${matchId}/answer`)
+        .post(`/api/matches/${matchId}/answer-complete`)
         .set(hdr(b))
-        .send({ answer: 'B' });
+        .send({});
       await request(app)
         .post(`/api/matches/${matchId}/score`)
         .set(hdr(a))
         .send({ score: 5 });
-      await request(app)
+      const first = await request(app)
         .post(`/api/matches/${matchId}/review`)
         .set(hdr(a))
         .send({ flag: true });
+      if (first.body.status === 'ENDED') return first.body;
       return (
         await request(app)
           .post(`/api/matches/${matchId}/review`)
           .set(hdr(b))
-          .send({ flag: true })
+          .send({ flag: false })
       ).body;
     }
 
-    let body = await playBothFlag();
-    body = await playBothFlag();
+    let body = await playP1Flag();
+    body = await playP1Flag();
+    body = await playP1Flag();
     expect(body.status).toBe('ENDED');
 
     const result = await request(app)
@@ -176,7 +178,8 @@ describe.skipIf(!hasDb)('GET /api/matches/:matchId/result (items 68–69)', () =
     expect(typeof result.body.player2.finalScore).toBe('number');
     expect(['PLAYER_1', 'PLAYER_2', 'DRAW']).toContain(result.body.winner);
     expect(result.body.questionsCompleted).toBeGreaterThanOrEqual(1);
-    expect(result.body.flagCount).toBeGreaterThanOrEqual(3);
+    expect(result.body.player1FlagCount).toBe(3);
+    expect(result.body.player2FlagCount).toBe(0);
     expect(result.body.endReason).toBe('THREE_FLAGS');
   });
 });

@@ -1,7 +1,8 @@
-# Entity-Relationship Diagram (final)
+# Entity-Relationship Diagram (live-audio MVP)
 
 **Database:** PostgreSQL 16  
-**Initialization:** `database/schema.sql` + `database/seed.sql` (Docker entrypoint on new volume)
+**Initialization:** `database/schema.sql` + `database/seed.sql` (Docker entrypoint on new volume)  
+**Knowledge Base:** V2.0 — spoken answers; **no** answer TEXT columns
 
 ---
 
@@ -45,7 +46,8 @@
       | current_question  1–10               |
       | phase             enum string        |
       | status            ACTIVE | ENDED     |
-      | flag_count                           |
+      | player1_flag_count                   |
+      | player2_flag_count                   |
       | end_reason        COMPLETED|THREE_FLAGS|null
       | created_at, ended_at                 |
       +------------------+-------------------+
@@ -57,15 +59,27 @@
       +--------------------------------------+
       | match_id          PK,FK              |
       | question_number   PK  (1–10)         |
-      | player1_answer                       |
+      | player1_answer_completed  BOOLEAN    |  NOT NULL DEFAULT FALSE
       | player1_score     1–10 or null       |
-      | player1_score_flagged                |
-      | player1_reviewed                     |
-      | player2_answer                       |
+      | player1_score_flagged   BOOLEAN      |
+      | player1_reviewed        BOOLEAN      |
+      | player2_answer_completed  BOOLEAN    |  NOT NULL DEFAULT FALSE
       | player2_score     1–10 or null       |
-      | player2_score_flagged                |
-      | player2_reviewed                     |
+      | player2_score_flagged   BOOLEAN      |
+      | player2_reviewed        BOOLEAN      |
       +--------------------------------------+
+
+Added for spoken turns (KB V2.0):
+  player1_answer_completed BOOLEAN
+  player2_answer_completed BOOLEAN
+
+REMOVED (V1 text-answer model — not in schema):
+  player1_answer TEXT
+  player2_answer TEXT
+
+NOT in this ER model (by design):
+  LiveKit / rooms / tracks  — audio is NOT persisted; LiveKit is outside PostgreSQL
+  audio URLs, recordings, transcripts, media metadata tables
 
 +--------------------------------------+
 |              questions               |
@@ -93,11 +107,20 @@
 
 ---
 
-## Score semantics
+## Spoken answer vs database
+
+| Concept | Persistence |
+|---------|-------------|
+| Spoken audio | LiveKit only — **not** in PostgreSQL |
+| Turn finished | `player1_answer_completed` / `player2_answer_completed` |
+| Peer score | `player1_score` / `player2_score` (1–10) |
+| Flag / review | `*_score_flagged`, `*_reviewed` |
+
+Score semantics:
 
 - `player1_score` = score **given to Player 1 by Player 2**  
 - `player2_score` = score **given to Player 2 by Player 1**  
-- Flagged scores are excluded from final averages (`calculateResult`)
+- Flagged scores excluded from final averages (`calculateResult`)
 
 ---
 

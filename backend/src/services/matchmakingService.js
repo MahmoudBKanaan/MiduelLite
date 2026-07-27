@@ -149,8 +149,9 @@ async function createMatch(client, player1Id, player2Id) {
        current_question,
        phase,
        status,
-       flag_count
-     ) VALUES ($1, $2, $3, 1, 'P1_ANSWER', 'ACTIVE', 0)
+       player1_flag_count,
+       player2_flag_count
+     ) VALUES ($1, $2, $3, 1, 'P1_ANSWER', 'ACTIVE', 0, 0)
      RETURNING id`,
     [player1Id, player2Id, competitionId]
   );

@@ -20,12 +20,16 @@ const GREEN = '3ECF8E';
 const LINE = '334155';
 
 const GH = 'https://github.com/MahmoudBKanaan/MiduelLite';
+/** Title-slide identity — edit if needed */
+const STUDENT_NAME = 'Mahmoud B. Kanaan';
+/** Set IU matriculation number before final submission if different */
+const MATRICULATION = process.env.IU_MATRICULATION || 'Matriculation number: see IU myCampus';
 const TOTAL = 18;
 
 const pres = new pptxgen();
 pres.layout = 'LAYOUT_16x9';
 pres.author = 'Minduel Lite Project';
-pres.title = 'Minduel Lite — IU Oral Project Report';
+pres.title = 'Minduel Lite: Live-Audio Intellectual Competition — IU Oral Project Report';
 pres.subject = 'DLBSEPPSD01_E Software Development Task 2';
 
 function footer(slide, n) {
@@ -62,20 +66,20 @@ function figNote(slide, text, y = 4.95) {
   const s = pres.addSlide();
   s.background = { color: BG };
   s.addText('MINDUEL LITE', {
-    x: 0.5, y: 1.15, w: 9, h: 0.65,
-    fontSize: 38, fontFace: 'Calibri', bold: true, color: TEXT, margin: 0,
+    x: 0.5, y: 0.95, w: 9, h: 0.55,
+    fontSize: 36, fontFace: 'Calibri', bold: true, color: TEXT, margin: 0,
   });
-  s.addText('An Interest-Based Two-Player Intellectual Competition Web Application', {
-    x: 0.5, y: 1.85, w: 9, h: 0.45,
-    fontSize: 16, fontFace: 'Calibri', color: MUTED, margin: 0,
+  s.addText('An Interest-Based Two-Player Live-Audio Intellectual Competition Web Application', {
+    x: 0.5, y: 1.55, w: 9, h: 0.65,
+    fontSize: 15, fontFace: 'Calibri', color: MUTED, margin: 0,
   });
   s.addText([
     { text: 'IU International University of Applied Sciences', options: { breakLine: true } },
     { text: 'Course: DLBSEPPSD01_E — Software Development', options: { breakLine: true } },
     { text: 'Examination: Oral Project Report · Task 2 — Development of a Web Application', options: { breakLine: true } },
   ], {
-    x: 0.5, y: 2.5, w: 9, h: 0.95,
-    fontSize: 14, fontFace: 'Calibri', color: MUTED, margin: 0,
+    x: 0.5, y: 2.3, w: 9, h: 0.9,
+    fontSize: 13, fontFace: 'Calibri', color: MUTED, margin: 0,
   });
 
   // Prominent GitHub block (requirement 206)
@@ -93,9 +97,9 @@ function figNote(slide, text, y = 4.95) {
     hyperlink: { url: GH },
   });
 
-  s.addText('Student name  ·  Matriculation number  ·  [replace before submission]', {
+  s.addText(`${STUDENT_NAME}  ·  ${MATRICULATION}`, {
     x: 0.5, y: 4.65, w: 9, h: 0.3,
-    fontSize: 12, fontFace: 'Calibri', italic: true, color: LINE, margin: 0,
+    fontSize: 13, fontFace: 'Calibri', color: MUTED, margin: 0,
   });
   footer(s, 1);
 }
@@ -142,17 +146,17 @@ function figNote(slide, text, y = 4.95) {
   s.addText('Problem', {
     x: 0.7, y: 1.25, w: 4, h: 0.32, fontSize: 15, bold: true, color: ACCENT, margin: 0,
   });
-  s.addText('Short intellectual interaction is often blocked by registration, permanent profiles, and social features that are unnecessary for a brief two-player exchange.', {
+  s.addText('Short intellectual interaction is often blocked by registration, permanent profiles, and heavy multiplayer platforms. Text-only flows also remove natural spoken exchange for a brief two-player duel.', {
     x: 0.7, y: 1.7, w: 4, h: 2.6, fontSize: 13, color: TEXT, margin: 0, valign: 'top',
   });
   s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
     x: 5.1, y: 1.1, w: 4.4, h: 3.5,
     fill: { color: CARD }, rectRadius: 0.08, line: { color: LINE },
   });
-  s.addText('Objective (Task 2)', {
+  s.addText('Objective (Task 2 + project)', {
     x: 5.3, y: 1.25, w: 4, h: 0.32, fontSize: 15, bold: true, color: GREEN, margin: 0,
   });
-  s.addText('Deliver a demonstrable full-stack SPA: React frontend, Node/Express backend, PostgreSQL, two-user interaction, automated tests, Docker Compose, and documentation — optimised for submission reliability, not commercial scale.', {
+  s.addText('Deliver a demonstrable full-stack SPA for IU Task 2 (React, Express, PostgreSQL, tests, Docker Compose, docs) with two-user interaction. Live spoken answers via managed LiveKit are part of this project’s defined solution — not a separate IU examination mandate for audio/WebRTC.', {
     x: 5.3, y: 1.7, w: 4, h: 2.6, fontSize: 13, color: TEXT, margin: 0, valign: 'top',
   });
   footer(s, 3);
@@ -173,8 +177,8 @@ function figNote(slide, text, y = 4.95) {
   s.addText([
     { text: 'Zero signup friction → temporary session (playerId + sessionToken)', options: { bullet: true, breakLine: true } },
     { text: 'Meaningful pairing → interest overlap matchmaking (no ML stack)', options: { bullet: true, breakLine: true } },
-    { text: 'Two-user interaction → turn-based peer-scored match state machine', options: { bullet: true, breakLine: true } },
-    { text: 'Demonstrable full stack → SPA + API + DB + Docker Compose', options: { bullet: true } },
+    { text: 'Spoken two-user interaction → LiveKit room + turn-based peer scoring', options: { bullet: true, breakLine: true } },
+    { text: 'Demonstrable full stack → SPA + API + DB + Docker Compose (+ LiveKit Cloud for audio)', options: { bullet: true } },
   ], {
     x: 0.6, y: 2.4, w: 8.8, h: 2.3, fontSize: 14, color: TEXT, paraSpaceAfter: 8,
   });
@@ -195,10 +199,10 @@ function figNote(slide, text, y = 4.95) {
       { text: 'Explicitly excluded', options: { bold: true, color: 'FFFFFF', fill: { color: '4A2020' } } },
     ],
     ['React SPA, Express API, PostgreSQL', 'Accounts / OAuth / JWT login'],
-    ['4 routes; temporary sessions', 'WebSockets, WebRTC audio'],
-    ['Matchmaking 3→2→1 interests', 'Chat, rankings, history UI'],
-    ['Peer scoring, flags, results', 'Cloud / K8s / microservices'],
-    ['Tests, Docker Compose, docs', 'AI scoring, admin CMS'],
+    ['Live spoken answers (managed LiveKit)', 'Self-hosted WebRTC / TURN stack'],
+    ['Matchmaking 3→2→1; answer-complete', 'Chat, rankings, history UI'],
+    ['Peer scoring, flags, results', 'Recording / transcription'],
+    ['Tests, Docker Compose (3 services), docs', 'K8s / microservices / AI scoring'],
   ], {
     x: 0.5, y: 1.5, w: 9, h: 3.2,
     colW: [4.5, 4.5],
@@ -219,7 +223,7 @@ function figNote(slide, text, y = 4.95) {
   });
   s.addText([
     { text: 'Why not pure Scrum? Solo student, fixed MVP, short timeline — ceremonies add overhead without team coordination benefit.', options: { bullet: true, breakLine: true } },
-    { text: 'Increments: concept → foundation → matchmaking → match engine → result → tests/docs → presentation.', options: { bullet: true, breakLine: true } },
+    { text: 'Increments: concept → foundation → matchmaking → match → result → LIVE AUDIO → tests/docs → presentation.', options: { bullet: true, breakLine: true } },
     { text: 'Board columns: BACKLOG → READY → IN PROGRESS → TEST → DONE (evidence below).', options: { bullet: true } },
   ], {
     x: 0.5, y: 1.5, w: 5.3, h: 2.8, fontSize: 13, color: TEXT, paraSpaceAfter: 8,
@@ -239,17 +243,17 @@ function figNote(slide, text, y = 4.95) {
 {
   const s = pres.addSlide();
   s.background = { color: BG };
-  titleBar(s, '2. Planning — user journey (not a UI tour)');
-  s.addText('Four screens map the planned flow; the oral report emphasises process and architecture around this journey.', {
-    x: 0.5, y: 1.0, w: 9, h: 0.4, fontSize: 13, italic: true, color: MUTED, margin: 0,
+  titleBar(s, '2. Planning — user journey (spoken live audio)');
+  s.addText('Welcome → Pool → match created → audio connected → spoken answers → Result', {
+    x: 0.5, y: 0.95, w: 9, h: 0.35, fontSize: 14, bold: true, color: ACCENT, margin: 0,
   });
-  s.addText('Welcome → Pool → Match → Result  |  Play again → Pool  |  Reset → Welcome', {
-    x: 0.5, y: 1.45, w: 9, h: 0.35, fontSize: 14, bold: true, color: ACCENT, margin: 0,
+  s.addText('Play again → Pool (new match + new LiveKit room)  ·  Reset → Welcome', {
+    x: 0.5, y: 1.3, w: 9, h: 0.28, fontSize: 12, italic: true, color: MUTED, margin: 0,
   });
   const shots = [
     ['192-welcome.png', 'Welcome'],
     ['193-pool.png', 'Pool'],
-    ['194-match.png', 'Match'],
+    ['194-match.png', 'Match + audio'],
     ['195-result.png', 'Result'],
   ];
   shots.forEach(([file, label], i) => {
@@ -257,16 +261,16 @@ function figNote(slide, text, y = 4.95) {
     try {
       s.addImage({
         path: path.join(SHOTS, file),
-        x, y: 1.9, w: 2.2, h: 2.7,
-        sizing: { type: 'contain', w: 2.2, h: 2.7 },
+        x, y: 1.7, w: 2.2, h: 2.85,
+        sizing: { type: 'contain', w: 2.2, h: 2.85 },
       });
     } catch { /* */ }
     s.addText(label, {
-      x, y: 4.65, w: 2.2, h: 0.25,
+      x, y: 4.6, w: 2.2, h: 0.25,
       fontSize: 11, color: MUTED, align: 'center', margin: 0,
     });
   });
-  figNote(s, 'Figures 2–5. Application screenshots of the planned four-screen journey (own software).');
+  figNote(s, 'Figures 2–5. Four-screen journey with live spoken match (own software).');
   footer(s, 7);
 }
 
@@ -274,22 +278,32 @@ function figNote(slide, text, y = 4.95) {
 {
   const s = pres.addSlide();
   s.background = { color: BG };
-  titleBar(s, '3. Architecture — C4 containers');
-  s.addText('Design decision: one SPA, one API, one database — simplest structure that meets Task 2.', {
-    x: 0.5, y: 0.95, w: 9, h: 0.3, fontSize: 12, italic: true, color: MUTED, margin: 0,
+  titleBar(s, '3. Architecture — C4 + LiveKit');
+  s.addText('Simple distinction: Express + PostgreSQL = game state · LiveKit = live audio · REST polling = game sync', {
+    x: 0.5, y: 0.92, w: 9, h: 0.32, fontSize: 12, bold: true, color: GREEN, margin: 0,
   });
   try {
     s.addImage({
       path: path.join(SHOTS, '199-c4.png'),
-      x: 1.3, y: 1.25, w: 7.4, h: 3.5,
-      sizing: { type: 'contain', w: 7.4, h: 3.5 },
+      x: 0.4, y: 1.25, w: 5.6, h: 3.5,
+      sizing: { type: 'contain', w: 5.6, h: 3.5 },
     });
   } catch {
-    s.addText('User → React SPA → Express → PostgreSQL', {
-      x: 0.5, y: 2.5, w: 9, h: 0.5, fontSize: 18, color: TEXT, align: 'center',
+    s.addText('React SPA → REST → Express → SQL → PostgreSQL\nReact SPA ↔ mic audio ↔ LiveKit\nExpress → signed token → LiveKit', {
+      x: 0.5, y: 2.0, w: 5.5, h: 1.8, fontSize: 14, color: TEXT,
     });
   }
-  figNote(s, 'Figure 6. C4 container diagram (own diagram). Backend is authoritative for game state.');
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 6.2, y: 1.3, w: 3.4, h: 3.4,
+    fill: { color: CARD }, rectRadius: 0.08, line: { color: LINE },
+  });
+  s.addText('Talking points', {
+    x: 6.4, y: 1.45, w: 3.0, h: 0.3, fontSize: 13, bold: true, color: ACCENT, margin: 0,
+  });
+  s.addText('• EXPRESS + POSTGRESQL\n  = authoritative game state\n\n• LIVEKIT (managed Cloud)\n  = live microphone audio\n\n• REST polling ≈ 1s\n  = game synchronisation\n\n• LiveKit is part of the\n  project’s defined solution\n  (not an IU audio mandate)', {
+    x: 6.4, y: 1.85, w: 3.0, h: 2.6, fontSize: 12, color: TEXT, margin: 0,
+  });
+  figNote(s, 'Figure 6. C4 + external LiveKit (own diagram). Media API: LiveKit docs (external).');
   footer(s, 8);
 }
 
@@ -305,71 +319,126 @@ function figNote(slide, text, y = 4.95) {
       sizing: { type: 'contain', w: 8.8, h: 3.7 },
     });
   } catch { /* */ }
-  figNote(s, 'Figure 7. ER diagram (own diagram). Five tables; 100×10 = 1,000 seeded questions.');
+  figNote(s, 'Figure 7. ER (own). answer_completed booleans; no answer TEXT; LiveKit not in ER (audio not persisted).');
   footer(s, 9);
 }
 
-// ========== 10 Matchmaking ==========
+// ========== 10 Code: LiveKit token + MatchAudio ==========
 {
   const s = pres.addSlide();
   s.background = { color: BG };
-  titleBar(s, '3. Architecture — matchmaking logic');
-  s.addText('similarity = sharedInterestCount / 3', {
-    x: 0.5, y: 1.1, w: 9, h: 0.4,
-    fontSize: 20, fontFace: 'Consolas', bold: true, color: GREEN, margin: 0,
+  titleBar(s, '4. Implementation — LiveKit token & MatchAudio');
+  s.addText('audioTokenService.js — signed grant (secret on server only)', {
+    x: 0.4, y: 0.95, w: 4.6, h: 0.28, fontSize: 11, bold: true, color: ACCENT, margin: 0,
   });
-  s.addTable([
-    [
-      { text: 'Shared', options: { bold: true, fill: { color: '1E3A5F' }, color: 'FFFFFF' } },
-      { text: 'Similarity', options: { bold: true, fill: { color: '1E3A5F' }, color: 'FFFFFF' } },
-      { text: 'Matchmaking', options: { bold: true, fill: { color: '1E3A5F' }, color: 'FFFFFF' } },
-    ],
-    ['3', '1.00', 'Highest priority'],
-    ['2', '≈ 0.67', 'Next'],
-    ['1', '≈ 0.33', 'Lowest eligible'],
-    ['0', '0.00', 'Never matched'],
-  ], {
-    x: 0.5, y: 1.7, w: 5.4, h: 2.5,
-    colW: [1.2, 1.5, 2.7],
-    border: { pt: 0.5, color: LINE },
-    fontFace: 'Calibri', fontSize: 13, color: TEXT,
-    fill: { color: CARD }, valign: 'middle',
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 0.35, y: 1.25, w: 4.7, h: 3.55,
+    fill: { color: '121A24' }, rectRadius: 0.06, line: { color: LINE },
   });
-  s.addText([
-    { text: 'Implementation choice', options: { bold: true, breakLine: true } },
-    { text: 'Set intersection only — no ML, no vector DB.', options: { breakLine: true } },
-    { text: 'Waiting player = P1; joiner = P2.', options: { breakLine: true } },
-    { text: 'Tie-break: earliest joined_at.', options: { breakLine: true } },
-    { text: 'Excerpt: calculateInterestOverlap / selectBestCandidate', options: {} },
-  ], {
-    x: 6.2, y: 1.7, w: 3.3, h: 2.8, fontSize: 13, color: TEXT, margin: 0,
+  s.addText(`const at = new AccessToken(apiKey, apiSecret, {
+  identity: playerId,
+  ttl: '2h',
+});
+at.addGrant({
+  roomJoin: true,
+  room: \`match-\${matchId}\`,
+  canPublish: true,
+  canSubscribe: true,
+  canPublishSources: [MICROPHONE],
+  canPublishData: false,
+});
+const token = await at.toJwt();
+return { token, serverUrl };`, {
+    x: 0.5, y: 1.35, w: 4.4, h: 3.3,
+    fontSize: 10, fontFace: 'Consolas', color: 'C8D6E5', margin: 0, valign: 'top',
   });
+  s.addText('MatchAudio.jsx — connect lifecycle', {
+    x: 5.2, y: 0.95, w: 4.5, h: 0.28, fontSize: 11, bold: true, color: GREEN, margin: 0,
+  });
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 5.15, y: 1.25, w: 4.55, h: 3.55,
+    fill: { color: '121A24' }, rectRadius: 0.06, line: { color: LINE },
+  });
+  s.addText(`// CONNECTING → getAudioToken → Room
+const { token, serverUrl } =
+  await getAudioToken(matchId);
+room = new Room({ ... });
+room.on(TrackSubscribed, attachRemote);
+await room.connect(serverUrl, token);
+await room.localParticipant
+  .setMicrophoneEnabled(true);
+setAudioState('CONNECTED');
+
+// cleanup on unmount only:
+// mic off, disconnect, remove listeners
+// deps: [matchId] — not phase/question`, {
+    x: 5.3, y: 1.35, w: 4.25, h: 3.3,
+    fontSize: 10, fontFace: 'Consolas', color: 'C8D6E5', margin: 0, valign: 'top',
+  });
+  figNote(s, 'Actual source excerpts. Membership validated before token; no API secret in the browser.');
   footer(s, 10);
 }
 
-// ========== 11 State machine ==========
+// ========== 11 Code: business logic ==========
 {
   const s = pres.addSlide();
   s.background = { color: BG };
-  titleBar(s, '4. Implementation — state machine');
-  try {
-    s.addImage({
-      path: path.join(SHOTS, '201-state.png'),
-      x: 0.25, y: 1.0, w: 5.3, h: 3.7,
-      sizing: { type: 'contain', w: 5.3, h: 3.7 },
-    });
-  } catch { /* */ }
+  titleBar(s, '4. Implementation — matchmaking & third flag');
+  s.addText('matchmakingService.js', {
+    x: 0.4, y: 0.95, w: 4.6, h: 0.25, fontSize: 11, bold: true, color: ACCENT, margin: 0,
+  });
   s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 5.7, y: 1.15, w: 3.8, h: 3.4,
-    fill: { color: CARD }, rectRadius: 0.08, line: { color: LINE },
+    x: 0.35, y: 1.22, w: 4.7, h: 3.55,
+    fill: { color: '121A24' }, rectRadius: 0.06, line: { color: LINE },
   });
-  s.addText('Backend authority', {
-    x: 5.9, y: 1.3, w: 3.4, h: 0.3, fontSize: 14, bold: true, color: ACCENT, margin: 0,
+  s.addText(`export function selectBestCandidate(
+  currentInterests, waitingPlayers) {
+  return waitingPlayers
+    .map(c => ({ ...c,
+      overlap: calculateInterestOverlap(
+        currentInterests, c.interests) }))
+    .filter(c => c.overlap >= 1) // never 0
+    .sort((a, b) => {
+      if (b.overlap !== a.overlap)
+        return b.overlap - a.overlap;
+      return new Date(a.joined_at)
+        - new Date(b.joined_at);
+    })[0] || null;
+}`, {
+    x: 0.5, y: 1.32, w: 4.4, h: 3.35,
+    fontSize: 10, fontFace: 'Consolas', color: 'C8D6E5', margin: 0, valign: 'top',
   });
-  s.addText('Frontend polls phase; does not invent rules.\n\nresolveAfterBothReviews:\n• flags ≥ 3 → THREE_FLAGS\n• Q = 10 → COMPLETED\n• else next question\n\nadvanceMatch() applies the decision in SQL.', {
-    x: 5.9, y: 1.7, w: 3.4, h: 2.6, fontSize: 12, fontFace: 'Calibri', color: TEXT, margin: 0,
+  s.addText('matchService.js — submitReview', {
+    x: 5.2, y: 0.95, w: 4.5, h: 0.25, fontSize: 11, bold: true, color: GREEN, margin: 0,
   });
-  figNote(s, 'Figure 8. User flow & match state (own diagram). Code: matchService.js.');
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 5.15, y: 1.22, w: 4.55, h: 3.55,
+    fill: { color: '121A24' }, rectRadius: 0.06, line: { color: LINE },
+  });
+  s.addText(`if (flag) {
+  await client.query(
+    \`UPDATE matches
+     SET player1_flag_count = player1_flag_count + 1
+     WHERE id = $1\`, [matchId]);
+}
+const m = (await client.query(
+  'SELECT * FROM matches WHERE id = $1',
+  [matchId])).rows[0];
+
+// Immediate end — do not wait for
+// the other player's review
+if (m.player1_flag_count >= 3 ||
+    m.player2_flag_count >= 3) {
+  await client.query(
+    \`UPDATE matches SET status='ENDED',
+     end_reason='THREE_FLAGS',
+     ended_at=NOW() WHERE id=$1\`,
+    [matchId]);
+}`, {
+    x: 5.3, y: 1.32, w: 4.25, h: 3.35,
+    fontSize: 10, fontFace: 'Consolas', color: 'C8D6E5', margin: 0, valign: 'top',
+  });
+  figNote(s, 'Business logic excerpts: interest priority 3→2→1; either player ends at their own third flag; counts never combine.');
   footer(s, 11);
 }
 
@@ -378,27 +447,50 @@ function figNote(slide, text, y = 4.95) {
   const s = pres.addSlide();
   s.background = { color: BG };
   titleBar(s, '5. Testing & reproducible run');
-  s.addText('Automated tests cover core business rules; Docker Compose is the only required runtime path.', {
-    x: 0.5, y: 0.95, w: 9, h: 0.3, fontSize: 12, italic: true, color: MUTED, margin: 0,
+  s.addText([
+    { text: 'Backend: ', options: { bold: true } },
+    { text: 'audio-token authorization; answer-complete; per-player flag tests including mixed 2+2 remaining active', options: { breakLine: true } },
+    { text: 'Frontend: ', options: { bold: true } },
+    { text: 'MatchAudio CONNECTING / CONNECTED / FAILED + RETRY; cleanup disconnect; Answer complete calls completeAnswer', options: { breakLine: true } },
+    { text: 'Manual: ', options: { bold: true } },
+    { text: 'Chrome + Incognito; mic permission; Live audio connected; speak both ways; full spoken match path', options: {} },
+  ], {
+    x: 0.5, y: 0.95, w: 9, h: 1.15, fontSize: 12, color: TEXT, margin: 0,
   });
   try {
     s.addImage({
-      path: path.join(SHOTS, '197-tests.png'),
-      x: 0.3, y: 1.3, w: 4.8, h: 3.3,
-      sizing: { type: 'contain', w: 4.8, h: 3.3 },
+      path: path.join(SHOTS, '210-backend-tests.png'),
+      x: 0.3, y: 2.2, w: 4.6, h: 2.55,
+      sizing: { type: 'contain', w: 4.6, h: 2.55 },
     });
-  } catch { /* */ }
+  } catch {
+    try {
+      s.addImage({
+        path: path.join(SHOTS, '197-tests.png'),
+        x: 0.3, y: 2.2, w: 4.6, h: 2.55,
+        sizing: { type: 'contain', w: 4.6, h: 2.55 },
+      });
+    } catch { /* */ }
+  }
   try {
     s.addImage({
-      path: path.join(SHOTS, '198-docker.png'),
-      x: 5.3, y: 1.3, w: 4.3, h: 2.2,
-      sizing: { type: 'contain', w: 4.3, h: 2.2 },
+      path: path.join(SHOTS, '212-docker.png'),
+      x: 5.2, y: 2.2, w: 4.4, h: 2.0,
+      sizing: { type: 'contain', w: 4.4, h: 2.0 },
     });
-  } catch { /* */ }
-  s.addText('Command: docker compose up --build\nNo manual DB setup (schema.sql + seed.sql).', {
-    x: 5.3, y: 3.65, w: 4.3, h: 0.7, fontSize: 12, fontFace: 'Consolas', color: MUTED, margin: 0,
+  } catch {
+    try {
+      s.addImage({
+        path: path.join(SHOTS, '198-docker.png'),
+        x: 5.2, y: 2.2, w: 4.4, h: 2.0,
+        sizing: { type: 'contain', w: 4.4, h: 2.0 },
+      });
+    } catch { /* */ }
+  }
+  s.addText('docker compose up --build  ·  LiveKit env on backend only', {
+    x: 5.2, y: 4.3, w: 4.4, h: 0.35, fontSize: 11, fontFace: 'Consolas', color: MUTED, margin: 0,
   });
-  figNote(s, 'Figures 9–10. Test run output; Docker Compose services (own environment).');
+  figNote(s, 'Figures. Backend test evidence; Docker services (own environment).');
   footer(s, 12);
 }
 
@@ -411,12 +503,12 @@ function figNote(slide, text, y = 4.95) {
     x: 0.5, y: 1.05, w: 9, h: 0.4, fontSize: 13, italic: true, color: MUTED, margin: 0,
   });
   s.addText([
-    { text: 'Two independent browser sessions share one backend and database', options: { bullet: true, breakLine: true } },
-    { text: 'Interest matchmaking pairs compatible players into one matchId', options: { bullet: true, breakLine: true } },
-    { text: 'Authoritative phases: answer → score → review; flags and Q10 termination', options: { bullet: true, breakLine: true } },
-    { text: 'Results exclude flagged scores; play-again reuses temporary session', options: { bullet: true, breakLine: true } },
-    { text: 'Clean volume init: five tables + 1,000 questions without manual SQL steps', options: { bullet: true, breakLine: true } },
-    { text: 'Repository published with frontend, backend, DB, Docker, tests, docs', options: { bullet: true } },
+    { text: 'Two browser sessions share Express + PostgreSQL; each joins LiveKit for speech', options: { bullet: true, breakLine: true } },
+    { text: 'Match created → audio connected → spoken answers (answer-complete, no text upload)', options: { bullet: true, breakLine: true } },
+    { text: 'Authoritative phases: speak → score → review; either player’s third personal flag ends immediately', options: { bullet: true, breakLine: true } },
+    { text: 'Speech not recorded/stored/transcribed; only completion flags + scores in DB', options: { bullet: true, breakLine: true } },
+    { text: 'Play-again: new match + new LiveKit room; Docker Compose runs three app services', options: { bullet: true, breakLine: true } },
+    { text: 'Repository: frontend, backend, DB, Docker, tests, docs (GitHub on title slide)', options: { bullet: true } },
   ], {
     x: 0.6, y: 1.55, w: 8.8, h: 3.2, fontSize: 14, color: TEXT, paraSpaceAfter: 7,
   });
@@ -437,20 +529,19 @@ function figNote(slide, text, y = 4.95) {
   s.addText([
     { text: 'Two anonymous browser sessions', options: { bullet: true, breakLine: true } },
     { text: 'Interest matchmaking (3→2→1)', options: { bullet: true, breakLine: true } },
-    { text: '10-question completion + scoring', options: { bullet: true, breakLine: true } },
-    { text: 'Flags → THREE_FLAGS termination', options: { bullet: true, breakLine: true } },
-    { text: 'Results exclude flagged scores', options: { bullet: true, breakLine: true } },
-    { text: 'SPA + API + Postgres integrate', options: { bullet: true, breakLine: true } },
-    { text: 'Docker Compose one-command run', options: { bullet: true, breakLine: true } },
+    { text: 'Live spoken turns + peer scoring', options: { bullet: true, breakLine: true } },
+    { text: 'Separate P1/P2 flag counts → THREE_FLAGS when either reaches 3', options: { bullet: true, breakLine: true } },
+    { text: 'SPA + API + Postgres + LiveKit', options: { bullet: true, breakLine: true } },
+    { text: 'Docker Compose (3 app services)', options: { bullet: true, breakLine: true } },
     { text: 'Automated tests pass (FE + BE)', options: { bullet: true } },
   ], {
     x: 0.5, y: 1.7, w: 4.5, h: 3.1, fontSize: 12, color: TEXT, paraSpaceAfter: 3,
   });
-  s.addText('Limitations (intentional)', {
+  s.addText('Why LiveKit (not raw WebRTC)', {
     x: 5.3, y: 1.4, w: 4.2, h: 0.28, fontSize: 13, bold: true, color: MUTED, margin: 0,
   });
-  s.addText('Excluded to protect scope and demo reliability: no accounts/production auth, polling not WebSockets, no disconnect recovery, subjective scoring, no moderation/history/audio, local Docker only, no production scale. Design choices — not unfinished MVP work.', {
-    x: 5.3, y: 1.8, w: 4.2, h: 2.9, fontSize: 12, color: TEXT, margin: 0, valign: 'top',
+  s.addText('LiveKit is part of this project’s defined solution (not an IU-required audio stack). Managed LiveKit reduced:\n• signaling complexity\n• TURN/STUN responsibility\n• connection-management complexity\n• development time\n\n(Technical API: LiveKit official docs.)\n\nLimits: Cloud + internet, demo reconnection, no recording/transcription/moderation, temporary sessions, polling for game state.', {
+    x: 5.3, y: 1.75, w: 4.2, h: 2.95, fontSize: 11, color: TEXT, margin: 0, valign: 'top',
   });
   footer(s, 14);
 }
@@ -464,10 +555,10 @@ function figNote(slide, text, y = 4.95) {
     x: 0.5, y: 1.05, w: 4.5, h: 0.3, fontSize: 14, bold: true, color: ACCENT, margin: 0,
   });
   s.addText([
-    { text: 'Explicit exclusions reduced delivery risk', options: { bullet: true, breakLine: true } },
-    { text: 'Server-owned state simplified multiplayer consistency', options: { bullet: true, breakLine: true } },
-    { text: 'Polling was adequate for a two-player demo', options: { bullet: true, breakLine: true } },
-    { text: 'Focused tests beat high test volume', options: { bullet: true } },
+    { text: 'Managed LiveKit avoided raw WebRTC infrastructure', options: { bullet: true, breakLine: true } },
+    { text: 'Server-owned game state + short-lived media tokens', options: { bullet: true, breakLine: true } },
+    { text: 'Polling adequate for game sync; LiveKit for audio only', options: { bullet: true, breakLine: true } },
+    { text: 'Focused tests (token, audio states, third flag) beat volume', options: { bullet: true } },
   ], {
     x: 0.5, y: 1.45, w: 4.5, h: 2.8, fontSize: 13, color: TEXT, paraSpaceAfter: 6,
   });
@@ -476,9 +567,9 @@ function figNote(slide, text, y = 4.95) {
   });
   s.addText([
     { text: 'Authenticated accounts & history', options: { bullet: true, breakLine: true } },
-    { text: 'WebSockets / optional WebRTC audio', options: { bullet: true, breakLine: true } },
-    { text: 'Moderation & rankings', options: { bullet: true, breakLine: true } },
-    { text: 'Cloud deployment & stronger security ops', options: { bullet: true } },
+    { text: 'WebSockets for game state; advanced reconnect', options: { bullet: true, breakLine: true } },
+    { text: 'Recording / transcription / voice moderation', options: { bullet: true, breakLine: true } },
+    { text: 'Cloud deploy of the app stack; rankings', options: { bullet: true } },
   ], {
     x: 5.3, y: 1.45, w: 4.2, h: 2.8, fontSize: 13, color: TEXT, paraSpaceAfter: 6,
   });
@@ -565,11 +656,23 @@ function figNote(slide, text, y = 4.95) {
       options: { breakLine: true },
     },
     {
+      text: 'LiveKit. (n.d.). LiveKit documentation. https://docs.livekit.io/',
+      options: { breakLine: true },
+    },
+    {
+      text: 'LiveKit. (n.d.). Access tokens. https://docs.livekit.io/home/server/generating-tokens/',
+      options: { breakLine: true },
+    },
+    {
+      text: 'LiveKit. (n.d.). JavaScript client SDK. https://docs.livekit.io/home/client/connect/',
+      options: { breakLine: true },
+    },
+    {
       text: 'Kanaan, M. B. (2026). Minduel Lite [Computer software]. GitHub. ' + GH,
       options: {},
     },
   ], {
-    x: 0.5, y: 1.45, w: 9, h: 3.5, fontSize: 11, color: TEXT, paraSpaceAfter: 6,
+    x: 0.5, y: 1.4, w: 9, h: 3.55, fontSize: 10, color: TEXT, paraSpaceAfter: 5,
   });
   footer(s, 18);
 }

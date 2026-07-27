@@ -17,20 +17,22 @@
 
 1. **Title + GitHub link** (prominent)  
 2. Outline — task / planning / architecture / result / testing / reflection  
-3–5. Task definition (problem, users, scope)  
-6. Planning & process (Kanban)  
-7. User journey as planning artefact (not a UI tour)  
-8–10. Architecture (C4, ER, matchmaking)  
-11. Implementation (state machine)  
-12–13. Testing, Docker, operational result  
-14–15. Evaluation & reflection  
+3–5. Task definition (problem/objective with **spoken live interaction**, users, scope)  
+6. Planning & process (Kanban + **LIVE AUDIO** increment)  
+7. User journey: **match created → audio connected → spoken answers**  
+8–10. Architecture (**C4 + LiveKit**, ER, matchmaking)  
+10–11. Implementation **code excerpts**: LiveKit token + MatchAudio lifecycle; matchmaking + third-flag SQL  
+12–13. Testing (audio-token, MatchAudio states, manual two-browser audio) + Docker + result  
+14–15. Evaluation: **why LiveKit over raw WebRTC** (less signaling/TURN/STUN/conn-mgmt/time)  
 16. Conclusion + GitHub  
 17. **List of figures** (own work labelled)  
 18. **Bibliography** (APA-style external sources)  
 
+**Architecture talking line:** Express + PostgreSQL = game state · LiveKit = live audio · REST polling = game synchronisation.
+
 **Academic pack:** [academic-citations.md](./academic-citations.md) — figures table, APA refs, speaking focus.  
 
-**Before recording:** replace student name / matriculation number on the title slide.
+**Title slide identity:** Mahmoud B. Kanaan (set `IU_MATRICULATION` env when rebuilding if you need a specific matriculation number on the slide).
 
 ## Supporting materials
 

@@ -68,7 +68,7 @@ A **mobile-first single-page web application** with four screens:
 3. **Match** — ten questions; players answer and score each other; optional flagging of received scores  
 4. **Result** — average scores (excluding flagged), winner/draw; play again or reset profile  
 
-Matchmaking prefers 3 shared interests, then 2, then 1; players with zero overlap are not matched. Three combined flagged scores end the match early.
+Matchmaking prefers 3 shared interests, then 2, then 1; players with zero overlap are not matched. The match ends early when either one player flags three scores they received; the two players' flag counts are separate and never combined.
 
 ### 6. Why a web application (not a native mobile app)
 
@@ -100,7 +100,7 @@ Justification: solo project, small fixed MVP, short development period, minimal 
 
 ### 10. Scope boundaries (explicit exclusions)
 
-No permanent accounts/login, no chat, no rankings, no live audio/WebRTC, no cloud deployment, no production-scale infrastructure. Focus remains a demonstrable full-stack academic MVP.
+No permanent accounts/login, no chat, no rankings, no cloud deployment of the app stack, no production-scale infrastructure. **Live spoken answers use managed LiveKit** (not self-hosted WebRTC infrastructure). Spoken audio is not recorded, stored, or transcribed. Focus remains a demonstrable full-stack academic MVP.
 
 ### 11. Deliverables for the oral report
 

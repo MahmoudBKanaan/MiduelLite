@@ -19,12 +19,28 @@ The product is built in **small increments**, each producing a usable slice of t
 | Concept | Problem, users, requirements, wireframes, architecture |
 | Foundation | Repository, React, Express, PostgreSQL, Docker, health check |
 | Profile + matchmaking | Welcome, temporary session, pool, interest matching |
-| Match | State machine, answers, scores, flags, completion |
+| Match | State machine, scores, flags, completion (originally text turns) |
 | Result | Averages, winner, play again / reset |
 | Hardening | Tests, documentation, clean Compose startup |
+| **LIVE AUDIO** | LiveKit config, token API, MatchAudio, answer-complete, tests, manual mic check |
 | Oral report | Screenshots, excerpts, presentation, critical evaluation |
 
 Each increment is **planned → implemented → tested → reflected** before the next major slice grows the system.
+
+### Increment: LIVE AUDIO (KB V2.0)
+
+One clear follow-on increment after the text-answer freeze (`safety/text-answer-mvp`). Scope stays tight — **only**:
+
+| Task | Outcome |
+|------|---------|
+| LiveKit configuration | Managed Cloud env: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` (backend only) |
+| Backend token endpoint | `POST /api/matches/:id/audio-token` with session + membership + ACTIVE checks |
+| MatchAudio | One LiveKit room per match; CONNECTING / CONNECTED / FAILED; mute/retry |
+| answer-complete refactor | Drop answer TEXT; `completeAnswer` + `player*_answer_completed` |
+| Tests | Backend audio-token / answer-complete / third-flag; frontend MatchAudio (mocked LiveKit) |
+| Manual audio verification | Chrome + Incognito, mic permission, speak both ways when credentials set |
+
+No extra Scrum ceremonies, sprint boards, story points, or parallel process tools — same five Kanban columns only.
 
 ### Kanban (flow management)
 

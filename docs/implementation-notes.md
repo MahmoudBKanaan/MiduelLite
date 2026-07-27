@@ -50,11 +50,11 @@ No ML, embeddings, or vector database.
 
 ```
 P1_ANSWER
-    → (P1 answer) →
+    → (P1 answer-complete / spoken) →
 P2_SCORE_P1
     → (P2 score 1–10) →
 P2_ANSWER
-    → (P2 answer) →
+    → (P2 answer-complete / spoken) →
 P1_SCORE_P2
     → (P1 score 1–10) →
 REVIEW
@@ -64,8 +64,10 @@ REVIEW
 ### After both reviews (`advanceMatch`)
 
 ```
-if flag_count >= 3:
+if player1_flag_count >= 3 or player2_flag_count >= 3:
     status = ENDED, end_reason = THREE_FLAGS
+
+The counts are independent: for example, Player 1 = 2 and Player 2 = 2 remains active.
 else if current_question >= 10:
     status = ENDED, end_reason = COMPLETED
 else:
@@ -88,7 +90,7 @@ Demonstration-appropriate controls only (see `docs/security.md`):
 | Control | Implementation |
 |---------|----------------|
 | Parameterized SQL | All queries use `$1…$n` via `pg` |
-| Server-side validation | Name, avatar, interests, answer, score, phase, ownership |
+| Server-side validation | Name, avatar, interests, answer-complete, score, phase, ownership, LiveKit token |
 | Temporary session | `X-Player-Id` + `X-Session-Token` (not JWT login) |
 | Helmet | Default security headers |
 | CORS | Restricted to `FRONTEND_ORIGIN` |
@@ -121,16 +123,16 @@ As delivered, the system deliberately has:
 
 1. **No permanent accounts**  
 2. **No production authentication** (temporary session headers only)  
-3. **Polling instead of WebSockets**  
-4. **No disconnect recovery**  
+3. **Polling for game state** (LiveKit for media only, not turn logic)  
+4. **No advanced disconnect recovery**  
 5. **Subjective peer scoring** (no objective answer key)  
-6. **No moderation**  
+6. **No voice moderation**  
 7. **No match history UI**  
-8. **No audio**  
-9. **No cloud deployment**  
-10. **No production scalability design** (single backend instance, local Docker)  
+8. **Dependence on managed LiveKit + internet for audio** (project-specific; not IU-mandated)  
+9. **No audio recording / storage / transcription**  
+10. **No cloud deployment of the app stack** / no production multi-region media design  
 
-These match the knowledge-base exclusions and are acceptable for the university MVP goal.
+These match KB V2.0 scope and are acceptable for the university MVP goal.
 
 ---
 
@@ -138,7 +140,7 @@ These match the knowledge-base exclusions and are acceptable for the university 
 
 Only claims that reflect work actually done on this project:
 
-1. **Fixed MVP scope reduced delivery risk.** The knowledge base’s explicit exclusions prevented feature creep (e.g. audio/WebSockets) that would have dominated the schedule.
+1. **Fixed MVP scope reduced delivery risk.** Managed LiveKit kept spoken audio feasible without building raw WebRTC infrastructure or bloating Compose.
 
 2. **Backend-authoritative state simplified multiplayer consistency.** With both browsers polling the same match row, turn order stayed consistent without client-side game logic.
 

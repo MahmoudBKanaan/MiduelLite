@@ -162,14 +162,14 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
   it('wrong-player turn rejection', async () => {
     const { a, b, matchId } = await startMatch([7, 8, 9], [7, 8, 10]);
     const bad = await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(b))
-      .send({ answer: 'Nope' });
+      .send({});
     expect(bad.status).toBe(403);
     const ok = await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(a))
-      .send({ answer: 'Yes' });
+      .send({});
     expect(ok.status).toBe(200);
     expect(ok.body.phase).toBe('P2_SCORE_P1');
   });
@@ -177,9 +177,9 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
   it('score range validation', async () => {
     const { a, b, matchId } = await startMatch([11, 12, 13], [11, 12, 14]);
     await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(a))
-      .send({ answer: 'A' });
+      .send({});
     const bad = await request(app)
       .post(`/api/matches/${matchId}/score`)
       .set(hdr(b))
@@ -195,9 +195,9 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
   it('valid phase progression', async () => {
     const { a, b, matchId } = await startMatch([15, 16, 17], [15, 16, 18]);
     let s = await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(a))
-      .send({ answer: 'P1' });
+      .send({});
     expect(s.body.phase).toBe('P2_SCORE_P1');
     s = await request(app)
       .post(`/api/matches/${matchId}/score`)
@@ -205,9 +205,9 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
       .send({ score: 8 });
     expect(s.body.phase).toBe('P2_ANSWER');
     s = await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(b))
-      .send({ answer: 'P2' });
+      .send({});
     expect(s.body.phase).toBe('P1_SCORE_P2');
     s = await request(app)
       .post(`/api/matches/${matchId}/score`)
@@ -216,20 +216,20 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
     expect(s.body.phase).toBe('REVIEW');
   });
 
-  it('flag count increment', async () => {
+  it('flag count increment belongs only to the reviewing player', async () => {
     const { a, b, matchId } = await startMatch([20, 21, 22], [20, 21, 23]);
     await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(a))
-      .send({ answer: 'P1' });
+      .send({});
     await request(app)
       .post(`/api/matches/${matchId}/score`)
       .set(hdr(b))
       .send({ score: 3 });
     await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(b))
-      .send({ answer: 'P2' });
+      .send({});
     await request(app)
       .post(`/api/matches/${matchId}/score`)
       .set(hdr(a))
@@ -238,45 +238,48 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
       .post(`/api/matches/${matchId}/review`)
       .set(hdr(a))
       .send({ flag: true });
-    expect(flagged.body.flagCount).toBe(1);
+    expect(flagged.body.player1FlagCount).toBe(1);
+    expect(flagged.body.player2FlagCount).toBe(0);
   });
 
   it('third-flag termination', async () => {
     const { a, b, matchId } = await startMatch([24, 25, 26], [24, 25, 27]);
 
-    async function roundBothFlag() {
+    async function roundP1Flag() {
       const st = await request(app).get(`/api/matches/${matchId}`).set(hdr(a));
       if (st.body.status === 'ENDED') return st.body;
       await request(app)
-        .post(`/api/matches/${matchId}/answer`)
+        .post(`/api/matches/${matchId}/answer-complete`)
         .set(hdr(a))
-        .send({ answer: 'A' });
+        .send({});
       await request(app)
         .post(`/api/matches/${matchId}/score`)
         .set(hdr(b))
         .send({ score: 2 });
       await request(app)
-        .post(`/api/matches/${matchId}/answer`)
+        .post(`/api/matches/${matchId}/answer-complete`)
         .set(hdr(b))
-        .send({ answer: 'B' });
+        .send({});
       await request(app)
         .post(`/api/matches/${matchId}/score`)
         .set(hdr(a))
         .send({ score: 2 });
-      await request(app)
+      const first = await request(app)
         .post(`/api/matches/${matchId}/review`)
         .set(hdr(a))
         .send({ flag: true });
+      if (first.body.status === 'ENDED') return first.body;
       return (
         await request(app)
           .post(`/api/matches/${matchId}/review`)
           .set(hdr(b))
-          .send({ flag: true })
+          .send({ flag: false })
       ).body;
     }
 
-    await roundBothFlag(); // +2
-    const end = await roundBothFlag(); // reaches >=3
+    await roundP1Flag();
+    await roundP1Flag();
+    const end = await roundP1Flag(); // P1's third personal flag ends immediately
     expect(end.status).toBe('ENDED');
     expect(end.endReason).toBe('THREE_FLAGS');
   });
@@ -284,10 +287,10 @@ describe.skipIf(!hasDb)('BT core — match rules', () => {
 
 describe('BT core — results & termination rules', () => {
   it('question-10 termination', () => {
-    expect(resolveAfterBothReviews(0, 10)).toEqual({ type: 'COMPLETED' });
-    expect(resolveAfterBothReviews(2, 10)).toEqual({ type: 'COMPLETED' });
-    // flags win over Q10
-    expect(resolveAfterBothReviews(3, 10)).toEqual({ type: 'THREE_FLAGS' });
+    expect(resolveAfterBothReviews(0, 0, 10)).toEqual({ type: 'COMPLETED' });
+    expect(resolveAfterBothReviews(2, 2, 10)).toEqual({ type: 'COMPLETED' });
+    // Either player's third personal flag wins over Q10.
+    expect(resolveAfterBothReviews(3, 0, 10)).toEqual({ type: 'THREE_FLAGS' });
   });
 
   it('flagged-score exclusion', () => {

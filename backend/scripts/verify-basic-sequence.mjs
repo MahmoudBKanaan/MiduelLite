@@ -1,6 +1,7 @@
 /**
- * Manual backend verification (items 70–71):
- * create A/B → pool → shared match → one full question → advance to Q2
+ * Manual backend verification (spoken-answer model):
+ * create A/B → pool → shared match → one full question (answer-complete, no text)
+ * → advance to Q2
  */
 import 'dotenv/config';
 import request from 'supertest';
@@ -84,12 +85,13 @@ async function main() {
   console.log('6. Current question:', stateA.body.questionText.slice(0, 60) + '...');
 
   const ans1 = await request(app)
-    .post(`/api/matches/${matchId}/answer`)
+    .post(`/api/matches/${matchId}/answer-complete`)
     .set(hdr(playerA))
-    .send({ answer: 'Player 1 answer for verification' });
-  assert(ans1.status === 200, `P1 answer failed: ${JSON.stringify(ans1.body)}`);
-  assert(ans1.body.phase === 'P2_SCORE_P1', `after P1 answer expected P2_SCORE_P1 got ${ans1.body.phase}`);
-  console.log('7. P1 answered →', ans1.body.phase);
+    .send({});
+  assert(ans1.status === 200, `P1 answer-complete failed: ${JSON.stringify(ans1.body)}`);
+  assert(ans1.body.phase === 'P2_SCORE_P1', `after P1 answer-complete expected P2_SCORE_P1 got ${ans1.body.phase}`);
+  assert(ans1.body.player1AnswerCompleted === true, 'P1 answer completed flag');
+  console.log('7. P1 spoken answer-complete →', ans1.body.phase);
 
   const sc2 = await request(app)
     .post(`/api/matches/${matchId}/score`)
@@ -100,12 +102,13 @@ async function main() {
   console.log('8. P2 scored →', sc2.body.phase);
 
   const ans2 = await request(app)
-    .post(`/api/matches/${matchId}/answer`)
+    .post(`/api/matches/${matchId}/answer-complete`)
     .set(hdr(playerB))
-    .send({ answer: 'Player 2 answer for verification' });
-  assert(ans2.status === 200, `P2 answer failed: ${JSON.stringify(ans2.body)}`);
-  assert(ans2.body.phase === 'P1_SCORE_P2', `after P2 answer expected P1_SCORE_P2 got ${ans2.body.phase}`);
-  console.log('9. P2 answered →', ans2.body.phase);
+    .send({});
+  assert(ans2.status === 200, `P2 answer-complete failed: ${JSON.stringify(ans2.body)}`);
+  assert(ans2.body.phase === 'P1_SCORE_P2', `after P2 answer-complete expected P1_SCORE_P2 got ${ans2.body.phase}`);
+  assert(ans2.body.player2AnswerCompleted === true, 'P2 answer completed flag');
+  console.log('9. P2 spoken answer-complete →', ans2.body.phase);
 
   const sc1 = await request(app)
     .post(`/api/matches/${matchId}/score`)

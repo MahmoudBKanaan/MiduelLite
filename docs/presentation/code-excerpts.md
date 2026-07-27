@@ -1,54 +1,85 @@
-# Implementation excerpts for the oral report (item 202)
+# Implementation excerpts for the oral report
 
-Six short excerpts only. Source paths are relative to the repository root.  
-Recommend **one excerpt per slide** (or two half-slides). Do not paste entire files.
+Readable **source excerpts** (not function names alone). Paths relative to repository root.
 
 ---
 
-## 1. Profile validation
+## 1. LiveKit token generation
 
-**File:** `backend/src/services/playerValidation.js`  
-**Demonstrates:** server-side input validation (not frontend-only).
+**File:** `backend/src/services/audioTokenService.js`  
+**Demonstrates:** server-side JWT; secret never leaves backend; mic-only grant.
 
 ```javascript
-export function validatePlayerInput(body) {
-  let { displayName, avatarId, interestIds } = body || {};
+export async function createAudioAccessToken({ matchId, playerId, displayName }) {
+  const { apiKey, apiSecret, serverUrl } = getLiveKitConfig();
+  const roomName = roomNameForMatch(matchId); // "match-{matchId}"
+  const identity = String(playerId);
 
-  if (typeof displayName !== 'string') {
-    return { ok: false, error: 'Display name is required' };
-  }
-  displayName = displayName.trim();
-  if (displayName.length < 2 || displayName.length > 20) {
-    return { ok: false, error: 'Display name must be 2–20 characters' };
-  }
+  const at = new AccessToken(apiKey, apiSecret, {
+    identity,
+    name: displayName ? String(displayName) : identity,
+    ttl: '2h',
+  });
 
-  const avatar = Number(avatarId);
-  if (!Number.isInteger(avatar) || !AVATAR_IDS.includes(avatar)) {
-    return { ok: false, error: 'Avatar must be an ID from 1 to 12' };
-  }
+  at.addGrant({
+    roomJoin: true,
+    room: roomName,
+    canPublish: true,
+    canSubscribe: true,
+    canPublishSources: [TrackSource.MICROPHONE],
+    canPublishData: false,
+  });
 
-  if (!Array.isArray(interestIds) || interestIds.length !== 3) {
-    return { ok: false, error: 'Exactly three interests are required' };
-  }
-  const ids = interestIds.map(Number);
-  if (ids.some((id) => !VALID_INTEREST_IDS.includes(id))) {
-    return { ok: false, error: 'Invalid interest IDs' };
-  }
-  if (new Set(ids).size !== 3) {
-    return { ok: false, error: 'Interests must be unique' };
-  }
-  return { ok: true, displayName, avatarId: avatar, interestIds: ids };
+  const token = await at.toJwt();
+  return { token, serverUrl, roomName, identity };
 }
 ```
 
-**Say:** Backend rejects invalid profiles before any database write.
+**Say:** Membership is checked before this runs (`issueMatchAudioToken`). API secret is env-only.
 
 ---
 
-## 2. Matchmaking
+## 2. MatchAudio connection lifecycle
 
-**File:** `backend/src/services/matchmakingService.js`  
-**Demonstrates:** interest overlap business logic.
+**File:** `frontend/src/components/MatchAudio.jsx`  
+**Demonstrates:** one Room per match; connect; mic; cleanup on unmount (not on phase change).
+
+```javascript
+const connect = async () => {
+  setAudioState('CONNECTING');
+  const { token, serverUrl } = await getAudioToken(matchId);
+  if (cancelled) return;
+
+  room = new Room({ adaptiveStream: true, dynacast: true });
+  roomRef.current = room;
+
+  room.on(RoomEvent.TrackSubscribed, (track) => {
+    if (track.kind === Track.Kind.Audio) attachRemoteAudio(track);
+  });
+
+  await room.connect(serverUrl, token);
+  if (cancelled) { await cleanupRoom(room); return; }
+
+  await room.localParticipant.setMicrophoneEnabled(true);
+  if (!cancelled) setAudioState('CONNECTED');
+};
+
+// Cleanup only when matchId changes / unmount / retry — not when phase changes
+return () => {
+  cancelled = true;
+  onConnectedRef.current?.(false);
+  cleanupRoom(roomRef.current || room); // mic off, disconnect, remove listeners
+};
+// useEffect deps: [matchId, retryNonce, ...]
+```
+
+**Say:** Game phases poll REST; audio room stays up for the whole match.
+
+---
+
+## 3. Matchmaking (business logic)
+
+**File:** `backend/src/services/matchmakingService.js`
 
 ```javascript
 export function calculateInterestOverlap(playerA, playerB) {
@@ -61,131 +92,69 @@ export function calculateInterestOverlap(playerA, playerB) {
   return count; // 0 | 1 | 2 | 3
 }
 
-// similarity = sharedInterestCount / 3
-// Priority when selecting opponent:
 export function selectBestCandidate(currentInterests, waitingPlayers) {
   return (waitingPlayers || [])
     .map((c) => ({
       ...c,
       overlap: calculateInterestOverlap(currentInterests, c.interests),
     }))
-    .filter((c) => c.overlap >= 1) // 0 shared → never match
+    .filter((c) => c.overlap >= 1) // zero shared → never match
     .sort((a, b) => {
-      if (b.overlap !== a.overlap) return b.overlap - a.overlap; // 3 > 2 > 1
-      return new Date(a.joined_at) - new Date(b.joined_at);     // earliest wins
+      if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+      return new Date(a.joined_at) - new Date(b.joined_at);
     })[0] || null;
 }
 ```
 
-**Say:** No ML — simple set intersection, fully testable and explainable.
-
 ---
 
-## 3. Match state transition
+## 4. Third-flag termination (business logic)
 
-**File:** `backend/src/services/matchService.js`  
-**Demonstrates:** controlled phase progression after scoring.
-
-```javascript
-// After Player 1 answers:
-//   phase P1_ANSWER → P2_SCORE_P1
-// After Player 2 scores Player 1:
-//   phase P2_SCORE_P1 → P2_ANSWER
-// After Player 2 answers:
-//   phase P2_ANSWER → P1_SCORE_P2
-// After Player 1 scores Player 2:
-//   phase P1_SCORE_P2 → REVIEW
-
-// Core decision after both players finish REVIEW:
-export function resolveAfterBothReviews(flagCount, currentQuestion) {
-  if (flagCount >= 3) return { type: 'THREE_FLAGS' };
-  if (currentQuestion >= 10) return { type: 'COMPLETED' };
-  return { type: 'NEXT', nextQuestion: currentQuestion + 1 };
-}
-```
-
-**Say:** Frontend only displays `phase` from the API; the server owns the state machine.
-
----
-
-## 4. Flag / termination logic
-
-**File:** `backend/src/services/matchService.js` — `advanceMatch`  
-**Demonstrates:** business rule for ending or continuing the match.
+**File:** `backend/src/services/matchService.js` — inside `submitReview`
 
 ```javascript
-export async function advanceMatch(client, matchId, flagCount, currentQuestion) {
-  const decision = resolveAfterBothReviews(flagCount, currentQuestion);
-
-  if (decision.type === 'THREE_FLAGS') {
+// FLAG → increment only the reviewing player's personal count
+if (flag) {
+  if (role === 'PLAYER_1') {
     await client.query(
       `UPDATE matches
-       SET status = 'ENDED', end_reason = 'THREE_FLAGS', ended_at = NOW()
+       SET player1_flag_count = player1_flag_count + 1
        WHERE id = $1`,
       [matchId]
     );
-    return decision;
-  }
-  if (decision.type === 'COMPLETED') {
+  } else {
     await client.query(
       `UPDATE matches
-       SET status = 'ENDED', end_reason = 'COMPLETED', ended_at = NOW()
+       SET player2_flag_count = player2_flag_count + 1
        WHERE id = $1`,
       [matchId]
     );
-    return decision;
   }
-  // Next question
+}
+
+const m = (await client.query(
+  'SELECT * FROM matches WHERE id = $1',
+  [matchId]
+)).rows[0];
+
+// Do not wait for the other player's review
+if (m.player1_flag_count >= 3 || m.player2_flag_count >= 3) {
   await client.query(
-    `UPDATE matches SET current_question = $1, phase = 'P1_ANSWER' WHERE id = $2`,
-    [decision.nextQuestion, matchId]
+    `UPDATE matches
+     SET status = 'ENDED', end_reason = 'THREE_FLAGS', ended_at = NOW()
+     WHERE id = $1`,
+    [matchId]
   );
-  await client.query(
-    `INSERT INTO match_rounds (match_id, question_number) VALUES ($1, $2)`,
-    [matchId, decision.nextQuestion]
-  );
-  return decision;
+  await client.query('COMMIT');
+  return getMatchState(matchId, playerId);
 }
 ```
 
-**Say:** Flagged scores are stored on the round; final averages exclude them in `calculateResult`.
-
 ---
 
-## 5. React polling
+## 5. Parameterized SQL
 
-**File:** `frontend/src/pages/MatchPage.jsx`  
-**Demonstrates:** frontend/backend interaction without WebSockets.
-
-```javascript
-useEffect(() => {
-  if (!requireSessionOrRedirect(navigate)) return undefined;
-
-  let cancelled = false;
-  refresh().catch((e) => {
-    if (!cancelled) setError(formatUserError(e, 'Could not load match'));
-  });
-
-  // Poll GET /api/matches/:matchId approximately once per second
-  pollRef.current = setInterval(() => {
-    refresh().catch(() => {});
-  }, 1000);
-
-  return () => {
-    cancelled = true;
-    stopPolling(); // clearInterval on unmount / ENDED
-  };
-}, [matchId, navigate]);
-```
-
-**Say:** Simple, debuggable, enough for a two-player local demo (ADR: polling over WebSockets).
-
----
-
-## 6. Parameterized SQL
-
-**File:** `backend/src/routes/players.js` (and the same pattern everywhere)  
-**Demonstrates:** SQL injection prevention + database integration.
+**File:** `backend/src/routes/players.js`
 
 ```javascript
 await query(
@@ -201,28 +170,16 @@ await query(
 );
 ```
 
-**Session ownership lookup** (`backend/src/middleware/session.js`):
-
-```javascript
-const result = await query(
-  `SELECT id, session_token, display_name, avatar_id, interests
-   FROM players WHERE id = $1`,
-  [playerId]
-);
-// then compare session_token to X-Session-Token header
-```
-
-**Say:** Values are never concatenated into SQL strings; `pg` placeholders bind parameters safely.
+**Say:** Values bound via `$n` — never string-concatenated into SQL.
 
 ---
 
-## Suggested slide order for excerpts
+## Suggested oral use
 
-| Slide | Excerpt | Message |
-|-------|---------|---------|
-| Impl 1 | Profile validation | Trust the server |
-| Impl 2 | Matchmaking | Simple domain logic |
-| Impl 3 | State transition | Authoritative backend |
-| Impl 4 | Flags | Clear termination rule |
-| Impl 5 | Polling | Pragmatic multiplayer sync |
-| Impl 6 | Parameterized SQL | Basic security + persistence |
+| Excerpt | Message |
+|---------|---------|
+| LiveKit token | Server owns secrets; scoped room + identity |
+| MatchAudio lifecycle | One room; connect/mic/cleanup |
+| Matchmaking | Simple domain logic, no ML |
+| Third flag | Immediate end when either one player's own count reaches 3; counts never combine |
+| Parameterized SQL | Baseline security + persistence |

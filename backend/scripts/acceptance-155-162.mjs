@@ -1,5 +1,6 @@
 /**
- * Acceptance verification items 155–162 against a running API.
+ * Acceptance verification (spoken-answer model) against a running API.
+ * Uses POST .../answer-complete (empty body) — no text answers.
  */
 const API = process.env.API_URL || 'http://localhost:3001';
 
@@ -53,10 +54,10 @@ async function playRound(a, b, matchId, { p1Score = 8, p2Score = 7, p1Flag = fal
   let s = await api(`/api/matches/${matchId}`, { player: a });
   if (s.status === 'ENDED') return s;
 
-  s = await api(`/api/matches/${matchId}/answer`, {
+  s = await api(`/api/matches/${matchId}/answer-complete`, {
     method: 'POST',
     player: a,
-    body: { answer: `P1 answer Q${s.currentQuestion}` },
+    body: {},
   });
   assert(s.phase === 'P2_SCORE_P1', `after P1 answer got ${s.phase}`);
 
@@ -67,10 +68,10 @@ async function playRound(a, b, matchId, { p1Score = 8, p2Score = 7, p1Flag = fal
   });
   assert(s.phase === 'P2_ANSWER', `after P2 score got ${s.phase}`);
 
-  s = await api(`/api/matches/${matchId}/answer`, {
+  s = await api(`/api/matches/${matchId}/answer-complete`, {
     method: 'POST',
     player: b,
-    body: { answer: `P2 answer Q${s.currentQuestion}` },
+    body: {},
   });
   assert(s.phase === 'P1_SCORE_P2', `after P2 answer got ${s.phase}`);
 
@@ -81,11 +82,14 @@ async function playRound(a, b, matchId, { p1Score = 8, p2Score = 7, p1Flag = fal
   });
   assert(s.phase === 'REVIEW', `after P1 score got ${s.phase}`);
 
-  await api(`/api/matches/${matchId}/review`, {
+  s = await api(`/api/matches/${matchId}/review`, {
     method: 'POST',
     player: a,
     body: { flag: p1Flag },
   });
+  // Either player's third personal flag ends immediately — do not wait for P2 review
+  if (s.status === 'ENDED') return s;
+
   s = await api(`/api/matches/${matchId}/review`, {
     method: 'POST',
     player: b,
@@ -180,41 +184,51 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  // 157–159: three flags terminate; flagged scores excluded
+  // 157–159: three flags by one player terminate; flagged scores excluded
   // -------------------------------------------------------------------------
   {
-    // Known scores: each round both flag → 2 flags per round; third flag mid-round 2
+    // Player 1 flags three received scores; Player 2 accepts all received scores.
     const { a, b, matchId } = await createPair('FLG', [10, 11, 12], [10, 11, 13]);
 
-    // Round 1: scores 9 and 8, both FLAG → flagCount 2, next Q
+    // Round 1: P1 has one personal flag.
     let s = await playRound(a, b, matchId, {
       p1Score: 9,
       p2Score: 8,
       p1Flag: true,
-      p2Flag: true,
+      p2Flag: false,
     });
-    assert(s.flagCount === 2, `after R1 flags got ${s.flagCount}`);
-    assert(s.status === 'ACTIVE', 'still active at 2 flags');
-    console.log('157. After 2 flags still ACTIVE, flagCount=', s.flagCount);
+    assert(s.player1FlagCount === 1, `P1 flags ${s.player1FlagCount}`);
+    assert(s.player2FlagCount === 0, `P2 flags ${s.player2FlagCount}`);
+    assert(s.status === 'ACTIVE', 'still active after P1 first flag');
 
-    // Round 2: P1 flags first (flag 3) then P2 — after both reviews, THREE_FLAGS
+    // Round 2: P1 reaches two; still active.
     s = await playRound(a, b, matchId, {
       p1Score: 5,
       p2Score: 4,
       p1Flag: true,
       p2Flag: false,
     });
+    assert(s.status === 'ACTIVE', 'still active after P1 second flag');
+    assert(s.player1FlagCount === 2, `P1 flags ${s.player1FlagCount}`);
+
+    // Round 3: P1's third personal flag ends immediately; P2 need not review.
+    s = await playRound(a, b, matchId, {
+      p1Score: 7,
+      p2Score: 6,
+      p1Flag: true,
+      p2Flag: false,
+    });
     assert(s.status === 'ENDED', '158 should ENDED on third flag');
     assert(s.endReason === 'THREE_FLAGS', `158 endReason ${s.endReason}`);
-    assert(s.flagCount >= 3, `158 flagCount ${s.flagCount}`);
-    console.log('158. Third flag → ENDED THREE_FLAGS, flagCount=', s.flagCount);
+    assert(s.player1FlagCount === 3, `P1 flags ${s.player1FlagCount}`);
+    assert(s.player2FlagCount === 0, `P2 flags ${s.player2FlagCount}`);
+    console.log('158. P1 third personal flag → ENDED THREE_FLAGS');
 
     const result = await api(`/api/matches/${matchId}/result`, { player: a });
-    // R1 both flagged → excluded; R2: P1 received 5 flagged, P2 received 4 accepted
-    // player1_score is score TO p1 FROM p2 = 5 flagged → excluded
-    // player2_score is score TO p2 FROM p1 = 4 not flagged → only valid for P2
+    // P1 flagged all three received scores. P2 accepted R1/R2; R3 ended
+    // immediately before P2 could review, so all P2 scores remain unflagged.
     assert(result.player1.finalScore === 0, `159 P1 avg should 0 got ${result.player1.finalScore}`);
-    assert(result.player2.finalScore === 4, `159 P2 avg should 4 got ${result.player2.finalScore}`);
+    assert(result.player2.finalScore === 6, `159 P2 avg should 6 got ${result.player2.finalScore}`);
     assert(result.winner === 'PLAYER_2', `159 winner ${result.winner}`);
     assert(result.endReason === 'THREE_FLAGS', '159 end reason');
     console.log(

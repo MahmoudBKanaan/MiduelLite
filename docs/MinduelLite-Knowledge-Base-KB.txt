@@ -791,7 +791,7 @@ YOUR TURN TO ANSWER
 Speak your answer to Alex.
 [MUTE MICROPHONE]
 [ANSWER COMPLETE]
-Flags: 1 / 3
+Your score strikes: 1 / 3
 ------------------------------------------------
 ================================================================================
 26. QUESTION SEQUENCE
@@ -921,16 +921,20 @@ They are excluded from final score calculations.
 ================================================================================
 32. THREE-FLAG TERMINATION
 ================================================================================
-The match maintains:
-totalFlagCount
-When a player submits a review with:
-flag = true
-the backend increments the count.
-If the new count reaches:
+The match maintains two independent counts:
+player1FlagCount
+player2FlagCount
+When Player 1 flags a score received from Player 2:
+the backend increments only player1FlagCount.
+When Player 2 flags a score received from Player 1:
+the backend increments only player2FlagCount.
+The match terminates immediately when either one individual count reaches:
 3
-the match terminates immediately.
+Flags from both players MUST NOT be combined for termination.
+Example:
+Player 1 = 2 flags and Player 2 = 2 flags means the match remains active.
 IMPORTANT:
-THE THIRD FLAG ITSELF MUST TRIGGER TERMINATION.
+THE THIRD FLAG BY THE SAME PLAYER MUST TRIGGER TERMINATION.
 The match MUST NOT wait for a possible fourth flag.
 End reason:
 THREE_FLAGS
@@ -978,7 +982,8 @@ REVIEW
     |
     | each player reviews own received score
     |
-    +---- third flag -------------> ENDED
+    +---- either player reaches
+    |     3 personal flags -------> ENDED
     |
     +---- both reviewed + Q10 ----> ENDED
     |
@@ -1159,7 +1164,8 @@ competition_id SMALLINT NOT NULL
 current_question SMALLINT NOT NULL DEFAULT 1
 phase VARCHAR NOT NULL
 status VARCHAR NOT NULL DEFAULT 'ACTIVE'
-flag_count SMALLINT NOT NULL DEFAULT 0
+player1_flag_count SMALLINT NOT NULL DEFAULT 0
+player2_flag_count SMALLINT NOT NULL DEFAULT 0
 end_reason VARCHAR NULL
 created_at TIMESTAMPTZ DEFAULT NOW()
 ended_at TIMESTAMPTZ NULL
@@ -1374,7 +1380,7 @@ Flag:
   "flag": true
 }
 Backend validates ownership.
-Third flag terminates immediately.
+Third flag by the same player terminates immediately.
 --------------------------------------------------
 GET /api/matches/:matchId/result
 --------------------------------------------------
@@ -1536,7 +1542,7 @@ Valid score advances phase.
 BT-13
 Flag increments flag count.
 BT-14
-THIRD flag immediately terminates match.
+THIRD flag by the same player immediately terminates match.
 BT-15
 Question 10 completes match.
 BT-16
@@ -1744,7 +1750,7 @@ always be considered beneficial?
 YOUR TURN TO ANSWER
 Speak your answer to Alex.
 [ANSWER COMPLETE]
-Flags: 1 / 3
+Your score strikes: 1 / 3
 ------------------------------------
 
 SCORING VARIANT:
@@ -1778,7 +1784,8 @@ Alex
 WINNER
 NEO
 Questions completed: 10
-Flags: 1
+Player 1 score strikes: 1
+Player 2 score strikes: 0
 [PLAY AGAIN]
 [RESET PROFILE]
 [EXIT]
@@ -1835,7 +1842,8 @@ Player may accept or flag their received score.
 FR-024
 Flagged scores shall not contribute to final average.
 FR-025
-The third total flag shall terminate the match immediately.
+The third score flag submitted by the same player shall terminate the match immediately.
+Flags submitted by different players shall never be combined for this threshold.
 FR-026
 Normally completed match shall contain ten questions.
 FR-027
@@ -2057,7 +2065,8 @@ Accepted scores remain valid.
 AC-20
 Flagged scores become struck.
 AC-21
-Third flag immediately ends match.
+Either player's third personal flag immediately ends the match; mixed flags do not
+combine.
 AC-22
 Otherwise next question loads.
 AC-23
@@ -2100,7 +2109,8 @@ PROJECT IS DONE ONLY WHEN:
 [ ] peer scoring operational
 [ ] score review operational
 [ ] flagging operational
-[ ] third flag terminates immediately
+[ ] third flag by the same player terminates immediately
+[ ] mixed Player 1 and Player 2 flags do not combine toward termination
 [ ] result calculation operational
 [ ] Play Again operational
 [ ] Reset Profile operational
@@ -2470,7 +2480,9 @@ BOTH REVIEW THEIR RECEIVED SCORES
         |
         +---- Flag
 Flagged score = struck.
-Third combined flag = immediate match termination.
+Third flag by Player 1 = immediate match termination.
+Third flag by Player 2 = immediate match termination.
+Player 1 and Player 2 flags are counted separately and never combined.
 Otherwise next question.
 Audio remains connected throughout.
         |
@@ -2570,7 +2582,8 @@ select exactly three interests, enter a matchmaking pool, be paired according to
 interests, establish a persistent browser-to-browser live-audio connection, receive the
 same intellectual questions, speak their answers to one another, score each other's
 answers, review the scores they receive, accept or flag those scores, complete the match
-or trigger three-flag termination, receive correctly calculated results, and either play
+or one player can trigger termination by personally flagging three received scores,
+receive correctly calculated results, and either play
 again or reset their temporary identities.
 The game state must operate through:
 React

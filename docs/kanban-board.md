@@ -12,12 +12,12 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 
 | ID | Task | Notes |
 |----|------|-------|
-| B-01 | Presentation screenshots (Welcome, Pool, Match, Result) | After UI stable |
-| B-02 | Presentation code excerpts (6 recommended) | After core code frozen |
+| B-01 | Presentation screenshots (incl. live-audio match UI) | After LiveKit demo stable |
+| B-02 | Presentation code excerpts (token + answer-complete) | Align with V2.0 |
 | B-03 | Oral presentation slides + PDF | ~15 minutes |
-| B-04 | Critical evaluation & lessons learned write-up | For slides + concept |
+| B-04 | Critical evaluation refresh (LiveKit limitations) | See `critical-evaluation.md` |
 | B-05 | Timed presentation rehearsal | Stay under 20 min cutoff |
-| B-06 | GitHub repository publish + title-slide link | After clean tree |
+| B-06 | Push Live Audio / docs commits to GitHub if not yet published | Title-slide link |
 
 ---
 
@@ -25,11 +25,9 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 
 | ID | Task | Notes |
 |----|------|-------|
-| R-01 | Tutor concept approval (IU requirement) | **Blocker for “implementation phase” narrative if not yet done** |
-| R-02 | Clean Docker verification (`docker compose up --build`) | DB verified; full stack still to confirm |
-| R-03 | Two-browser end-to-end smoke (match + result) | Chrome + Incognito |
-| R-04 | Backend integration tests with live PostgreSQL | Run after item 70 script |
-| R-05 | Commit remaining app/docs files & sync with GitHub | Many files still untracked vs `origin/main` |
+| R-01 | Fill LiveKit Cloud credentials in local `.env` | Needed for full mic demo |
+| R-02 | Two-browser live-audio smoke with headphones | After R-01 |
+| R-03 | Tutor concept approval if not yet done | IU process |
 
 ---
 
@@ -37,7 +35,7 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 
 | ID | Task | Notes |
 |----|------|-------|
-| — | *(none)* | Keep WIP low |
+| — | *(none)* | Keep WIP low — no parallel Scrum tracks |
 
 ---
 
@@ -45,7 +43,7 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 
 | ID | Task | Notes |
 |----|------|-------|
-| — | *(none)* | |
+| T-LA | Optional: re-run dual-browser audio when `.env` has LiveKit keys | Manual only |
 
 ---
 
@@ -96,30 +94,35 @@ Update this file as work moves. Optional: copy the same columns into Trello / Gi
 | D-14 | Dockerfiles + Docker Compose | Compose stack defined |
 | D-15 | Automated tests (frontend + backend unit) | Vitest suites |
 | D-16 | README + docs index | `README.md`, `docs/README.md` |
+| **D-LA** | **Increment: LIVE AUDIO (KB V2.0)** | See tasks below |
+| D-LA1 | LiveKit configuration | `.env` / `.env.example`; Compose passes `LIVEKIT_*` to backend only |
+| D-LA2 | Backend token endpoint | `POST /api/matches/:id/audio-token`; membership + ACTIVE; no secret in response |
+| D-LA3 | MatchAudio component | One room per match; CONNECTING/CONNECTED/FAILED; mute/retry; cleanup on unmount |
+| D-LA4 | answer-complete refactor | Schema flags; `completeAnswer`; remove answer TEXT; Match UI spoken flow |
+| D-LA5 | Automated tests | BE answer-complete / third-flag / audio-token; FE MatchAudio (LiveKit mocked) |
+| D-LA6 | Manual audio verification | Dual browser + mic checklist; stack rebuild after schema change |
+| D-LA7 | Docs for live audio | README, concept, architecture, ER, wireframes, security, critical evaluation |
 
 ---
 
 ## Practical task map (master to-do → board)
 
-Master checklist phases are **grouped** into board cards (not hundreds of tickets):
+Master checklist phases are **grouped** into board cards (not hundreds of tickets). **No Scrum sprints, stand-ups, or story points.**
 
-| Board card | Covers master phases (approx.) |
-|------------|--------------------------------|
-| Concept & diagrams | Phase 1 (items 1–6) |
-| Process & Kanban | Phase 1 (items 7–8) |
-| Tutor submission package | Phase 1 (item 9) |
-| Repo foundation | Phase 2 |
-| Database | Phase 3 |
-| Backend foundation + sessions | Phases 4–5 |
-| Matchmaking | Phase 6 |
-| Match engine | Phase 7 |
-| Frontend screens | Frontend phases |
-| Docker stack | Docker phases |
-| Tests | Testing phases |
-| README / final docs | Doc phases |
-| E2E smoke + Compose verify | Acceptance / hardening |
-| GitHub publish | Phase 25 |
-| Presentation & evaluation | Phases 26–29 |
+| Board card | Covers (approx.) |
+|------------|------------------|
+| Concept & diagrams | Early concept, wireframes, C4, ER |
+| Process & Kanban | Process model + this board |
+| Tutor submission package | Tutor concept package |
+| Repo foundation | Git, env example, structure |
+| Database | Schema + seed |
+| Backend / matchmaking / match | Players, pool, phases, scores, flags |
+| Frontend screens | Welcome → Result |
+| Docker stack | Three services only |
+| Tests | Vitest suites |
+| README / final docs | Runbook + evaluation |
+| **LIVE AUDIO** | LiveKit config, token API, MatchAudio, answer-complete, tests, manual mic check |
+| Presentation | Slides, screenshots, rehearsal |
 
 ---
 

@@ -13,21 +13,6 @@ export const MATCH_PHASES = [
 ];
 
 /**
- * Validate answer text: length 1–500 after trim.
- * @returns {{ ok: true, answer: string } | { ok: false, error: string }}
- */
-export function validateAnswerText(answer) {
-  if (typeof answer !== 'string') {
-    return { ok: false, error: 'Answer must be a string' };
-  }
-  const trimmed = answer.trim();
-  if (trimmed.length < 1 || trimmed.length > 500) {
-    return { ok: false, error: 'Answer must be 1–500 characters' };
-  }
-  return { ok: true, answer: trimmed };
-}
-
-/**
  * Validate peer score: integer 1–10.
  * @returns {{ ok: true, score: number } | { ok: false, error: string }}
  */
@@ -57,8 +42,9 @@ export function roleOf(match, playerId) {
 }
 
 /**
- * GET match state for the current player (items 45–46).
- * Includes names, avatars, role, question, phase, relevant answers/scores, flags, status.
+ * GET match state for the current player.
+ * No answer text (spoken via LiveKit). Includes players, role, question text,
+ * phase, completion flags, scores/reviews when appropriate, flags, status.
  */
 export async function getMatchState(matchId, playerId) {
   const match = await loadMatch(matchId);
@@ -91,10 +77,10 @@ export async function getMatchState(matchId, playerId) {
   );
   const round = roundRes.rows[0] || null;
 
-  // Relevant answer / score visibility by phase
+  // Spoken answers are not stored — only completion flags + scores/reviews
   const visible = {
-    player1Answer: null,
-    player2Answer: null,
+    player1AnswerCompleted: false,
+    player2AnswerCompleted: false,
     player1Score: null,
     player2Score: null,
     player1Reviewed: null,
@@ -107,27 +93,8 @@ export async function getMatchState(matchId, playerId) {
     const phase = match.phase;
     const ended = match.status === 'ENDED';
 
-    // Player 1 may always see own answer after submit; opponent sees it from scoring onward
-    if (
-      role === 'PLAYER_1' ||
-      phase === 'P2_SCORE_P1' ||
-      phase === 'P2_ANSWER' ||
-      phase === 'P1_SCORE_P2' ||
-      phase === 'REVIEW' ||
-      ended
-    ) {
-      visible.player1Answer = round.player1_answer;
-    }
-
-    // Player 2 answer visible to scorer / review / end; P2 sees own after submit
-    if (
-      role === 'PLAYER_2' ||
-      phase === 'P1_SCORE_P2' ||
-      phase === 'REVIEW' ||
-      ended
-    ) {
-      visible.player2Answer = round.player2_answer;
-    }
+    visible.player1AnswerCompleted = Boolean(round.player1_answer_completed);
+    visible.player2AnswerCompleted = Boolean(round.player2_answer_completed);
 
     if (phase === 'REVIEW' || ended) {
       visible.player1Score = round.player1_score;
@@ -153,7 +120,12 @@ export async function getMatchState(matchId, playerId) {
     phase: match.phase,
     currentQuestion: match.current_question,
     questionText,
-    flagCount: match.flag_count,
+    player1FlagCount: match.player1_flag_count,
+    player2FlagCount: match.player2_flag_count,
+    ownFlagCount:
+      role === 'PLAYER_1'
+        ? match.player1_flag_count
+        : match.player2_flag_count,
     endReason: match.end_reason,
     role,
     player1: {
@@ -171,19 +143,16 @@ export async function getMatchState(matchId, playerId) {
 }
 
 /**
- * POST answer — items 48–50.
- * P1_ANSWER (P1) → P2_SCORE_P1
- * P2_ANSWER (P2) → P1_SCORE_P2
+ * Mark spoken answer complete (KB V2.0 — no answer text stored).
+ * P1_ANSWER + PLAYER_1 → player1_answer_completed, phase P2_SCORE_P1
+ * P2_ANSWER + PLAYER_2 → player2_answer_completed, phase P1_SCORE_P2
+ *
+ * Rejects when: match ended, wrong player, wrong phase, or already completed.
+ *
+ * @param {string} matchId
+ * @param {string} playerId
  */
-export async function submitAnswer(matchId, playerId, answer) {
-  const validated = validateAnswerText(answer);
-  if (!validated.ok) {
-    const err = new Error(validated.error);
-    err.status = 400;
-    throw err;
-  }
-  const trimmed = validated.answer;
-
+export async function completeAnswer(matchId, playerId) {
   const client = await getClient();
   try {
     await client.query('BEGIN');
@@ -197,11 +166,15 @@ export async function submitAnswer(matchId, playerId, answer) {
       throw err;
     }
     const match = mRes.rows[0];
+
+    // Match ended / not active
     if (match.status !== 'ACTIVE') {
       const err = new Error('Match is not active');
       err.status = 409;
       throw err;
     }
+
+    // Player must be a participant
     const role = roleOf(match, playerId);
     if (!role) {
       const err = new Error('Not a participant');
@@ -209,50 +182,58 @@ export async function submitAnswer(matchId, playerId, answer) {
       throw err;
     }
 
-    if (match.phase === 'P1_ANSWER' && role === 'PLAYER_1') {
+    // Phase + role must match answer turn
+    const canP1 =
+      match.phase === 'P1_ANSWER' && role === 'PLAYER_1';
+    const canP2 =
+      match.phase === 'P2_ANSWER' && role === 'PLAYER_2';
+    if (!canP1 && !canP2) {
+      const err = new Error('Action not permitted in current phase');
+      err.status = 403;
+      throw err;
+    }
+
+    if (canP1) {
       const r = await client.query(
-        `SELECT player1_answer FROM match_rounds
+        `SELECT player1_answer_completed FROM match_rounds
          WHERE match_id = $1 AND question_number = $2 FOR UPDATE`,
         [matchId, match.current_question]
       );
-      if (r.rows[0]?.player1_answer) {
-        const err = new Error('Answer already submitted');
+      if (r.rows[0]?.player1_answer_completed) {
+        const err = new Error('Answer already completed');
         err.status = 409;
         throw err;
       }
       await client.query(
-        `UPDATE match_rounds SET player1_answer = $1
-         WHERE match_id = $2 AND question_number = $3`,
-        [trimmed, matchId, match.current_question]
+        `UPDATE match_rounds SET player1_answer_completed = TRUE
+         WHERE match_id = $1 AND question_number = $2`,
+        [matchId, match.current_question]
       );
       await client.query(
         `UPDATE matches SET phase = 'P2_SCORE_P1' WHERE id = $1`,
         [matchId]
       );
-    } else if (match.phase === 'P2_ANSWER' && role === 'PLAYER_2') {
+    } else {
+      // canP2
       const r = await client.query(
-        `SELECT player2_answer FROM match_rounds
+        `SELECT player2_answer_completed FROM match_rounds
          WHERE match_id = $1 AND question_number = $2 FOR UPDATE`,
         [matchId, match.current_question]
       );
-      if (r.rows[0]?.player2_answer) {
-        const err = new Error('Answer already submitted');
+      if (r.rows[0]?.player2_answer_completed) {
+        const err = new Error('Answer already completed');
         err.status = 409;
         throw err;
       }
       await client.query(
-        `UPDATE match_rounds SET player2_answer = $1
-         WHERE match_id = $2 AND question_number = $3`,
-        [trimmed, matchId, match.current_question]
+        `UPDATE match_rounds SET player2_answer_completed = TRUE
+         WHERE match_id = $1 AND question_number = $2`,
+        [matchId, match.current_question]
       );
       await client.query(
         `UPDATE matches SET phase = 'P1_SCORE_P2' WHERE id = $1`,
         [matchId]
       );
-    } else {
-      const err = new Error('Action not permitted in current phase');
-      err.status = 403;
-      throw err;
     }
 
     await client.query('COMMIT');
@@ -396,12 +377,17 @@ export function parseReviewAction(body) {
 /**
  * Pure decision for what happens after both players finish REVIEW.
  *
- * @param {number} flagCount - combined flagged scores so far
+ * @param {number} player1FlagCount - scores flagged by Player 1
+ * @param {number} player2FlagCount - scores flagged by Player 2
  * @param {number} currentQuestion - question number just completed (1–10)
  * @returns {{ type: 'THREE_FLAGS' } | { type: 'COMPLETED' } | { type: 'NEXT', nextQuestion: number }}
  */
-export function resolveAfterBothReviews(flagCount, currentQuestion) {
-  if (flagCount >= 3) {
+export function resolveAfterBothReviews(
+  player1FlagCount,
+  player2FlagCount,
+  currentQuestion
+) {
+  if (player1FlagCount >= 3 || player2FlagCount >= 3) {
     return { type: 'THREE_FLAGS' };
   }
   if (currentQuestion >= 10) {
@@ -416,11 +402,22 @@ export function resolveAfterBothReviews(flagCount, currentQuestion) {
  *
  * @param {import('pg').PoolClient} client
  * @param {string} matchId
- * @param {number} flagCount
+ * @param {number} player1FlagCount
+ * @param {number} player2FlagCount
  * @param {number} currentQuestion
  */
-export async function advanceMatch(client, matchId, flagCount, currentQuestion) {
-  const decision = resolveAfterBothReviews(flagCount, currentQuestion);
+export async function advanceMatch(
+  client,
+  matchId,
+  player1FlagCount,
+  player2FlagCount,
+  currentQuestion
+) {
+  const decision = resolveAfterBothReviews(
+    player1FlagCount,
+    player2FlagCount,
+    currentQuestion
+  );
   if (decision.type === 'THREE_FLAGS') {
     await client.query(
       `UPDATE matches
@@ -453,19 +450,25 @@ export async function advanceMatch(client, matchId, flagCount, currentQuestion) 
 }
 
 /**
- * POST review — items 56–61.
+ * POST review — score accept/flag.
  *
  * Each player reviews only their own received score.
  * Actions: ACCEPT (flag=false) or FLAG (flag=true).
- * FLAG marks the score flagged and increments match.flag_count.
+ * FLAG marks the score flagged and increments only the reviewing player's count.
  * Reviews are immutable once submitted.
  *
- * After both reviews:
- *   flag_count >= 3 → ENDED / THREE_FLAGS
- *   current_question = 10 → ENDED / COMPLETED
- *   else → next question, phase = P1_ANSWER
+ * Immediate termination (KB V2):
+ *   After any FLAG, if that same player's flag count reaches 3
+ *   → ENDED / THREE_FLAGS immediately.
+ *   Do not wait for the opponent's review.
+ *   Further reviews are rejected (match not active) so a fourth flag is impossible.
  *
- * Phase transitions already enforced by submitScore (items 53–55):
+ * While each player's flag count remains below 3:
+ *   After both reviews → advanceMatch:
+ *     Q10 → ENDED / COMPLETED
+ *     else → next question, phase = P1_ANSWER
+ *
+ * Phase transitions already enforced by submitScore:
  *   P2_SCORE_P1 → P2_ANSWER → P1_SCORE_P2 → REVIEW
  */
 export async function submitReview(matchId, playerId, flagOrBody) {
@@ -496,6 +499,7 @@ export async function submitReview(matchId, playerId, flagOrBody) {
       throw err;
     }
     const match = mRes.rows[0];
+    // Ended match: no further flags/reviews (blocks fourth flag)
     if (match.status !== 'ACTIVE') {
       const err = new Error('Match is not active');
       err.status = 409;
@@ -525,11 +529,10 @@ export async function submitReview(matchId, playerId, flagOrBody) {
       throw err;
     }
 
-    // Each player reviews only their own received score (item 57)
+    // Each player reviews only their own received score
     // Player 1 reviews player1_score (given by P2); Player 2 reviews player2_score (given by P1)
     if (role === 'PLAYER_1') {
       if (round.player1_reviewed) {
-        // Immutable (item 60)
         const err = new Error('Review already submitted');
         err.status = 409;
         throw err;
@@ -554,12 +557,24 @@ export async function submitReview(matchId, playerId, flagOrBody) {
       );
     }
 
-    // FLAG → mark flagged (above) and increment match.flag_count (item 59)
+    // FLAG → increment only the reviewing player's count.
+    // Three flags must belong to one player; mixed totals never terminate.
     if (flag) {
-      await client.query(
-        `UPDATE matches SET flag_count = flag_count + 1 WHERE id = $1`,
-        [matchId]
-      );
+      if (role === 'PLAYER_1') {
+        await client.query(
+          `UPDATE matches
+           SET player1_flag_count = player1_flag_count + 1
+           WHERE id = $1`,
+          [matchId]
+        );
+      } else {
+        await client.query(
+          `UPDATE matches
+           SET player2_flag_count = player2_flag_count + 1
+           WHERE id = $1`,
+          [matchId]
+        );
+      }
     }
 
     const updated = await client.query(
@@ -567,6 +582,20 @@ export async function submitReview(matchId, playerId, flagOrBody) {
       [matchId]
     );
     const m = updated.rows[0];
+
+    // Immediate termination only when one player's own count reaches three.
+    if (m.player1_flag_count >= 3 || m.player2_flag_count >= 3) {
+      await client.query(
+        `UPDATE matches
+         SET status = 'ENDED', end_reason = 'THREE_FLAGS', ended_at = NOW()
+         WHERE id = $1`,
+        [matchId]
+      );
+      await client.query('COMMIT');
+      return getMatchState(matchId, playerId);
+    }
+
+    // Both per-player counts < 3: wait for both reviews, then progress.
     const r2 = await client.query(
       `SELECT player1_reviewed, player2_reviewed FROM match_rounds
        WHERE match_id = $1 AND question_number = $2`,
@@ -576,7 +605,13 @@ export async function submitReview(matchId, playerId, flagOrBody) {
       r2.rows[0].player1_reviewed && r2.rows[0].player2_reviewed;
 
     if (both) {
-      await advanceMatch(client, matchId, m.flag_count, m.current_question);
+      await advanceMatch(
+        client,
+        matchId,
+        m.player1_flag_count,
+        m.player2_flag_count,
+        m.current_question
+      );
     }
 
     await client.query('COMMIT');
@@ -701,7 +736,8 @@ export async function calculateResult(matchId, playerId) {
     },
     winner,
     questionsCompleted,
-    flagCount: match.flag_count,
+    player1FlagCount: match.player1_flag_count,
+    player2FlagCount: match.player2_flag_count,
     endReason: match.end_reason,
   };
 }

@@ -1,7 +1,7 @@
-# Wireframes — Minduel Lite (final)
+# Wireframes — Minduel Lite (live-audio MVP)
 
 Four screens only. Mobile-first layout; content width **max 480px**, centered on desktop.  
-Matches the implemented React pages.
+Matches the implemented React pages (Knowledge Base V2.0).
 
 ---
 
@@ -10,7 +10,7 @@ Matches the implemented React pages.
 ```
 ┌──────────────────────────────────────┐
 │            Minduel Lite              │
-│  Anonymous intellectual competition  │
+│  Live-audio intellectual competition │
 │                                      │
 │  Display name                        │
 │  ┌────────────────────────────────┐  │
@@ -21,12 +21,7 @@ Matches the implemented React pages.
 │  ┌────┐ ┌────┐ ┌────┐ ┌────┐         │
 │  │ 1  │ │ 2  │ │ 3  │ │ 4  │         │
 │  └────┘ └────┘ └────┘ └────┘         │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐         │
-│  │ 5  │ │ 6  │ │ 7  │ │ 8  │         │
-│  └────┘ └────┘ └────┘ └────┘         │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐         │
-│  │ 9  │ │10  │ │11  │ │12  │         │
-│  └────┘ └────┘ └────┘ └────┘         │
+│  … (12 total)                        │
 │                                      │
 │  Choose exactly 3 interests          │
 │  [Technology] [AI] [Programming] …   │
@@ -68,34 +63,42 @@ Matches the implemented React pages.
 
 ## Wireframe 3 — Match (`/match/:matchId`)
 
+Spoken answers only — **no answer textarea**.
+
 ```
 ┌──────────────────────────────────────┐
 │ Player 1: Neo      Player 2: Alex    │
 │   [av]               [av]            │
 │                                      │
-│  Question 4 / 10      Flags: 1 / 3   │
+│ Question 4 / 10  Your strikes: 1 / 3 │
 │                                      │
 │  "Should technological progress      │
 │   always be considered beneficial?"  │
 │                                      │
-│  (UI depends on phase + role)        │
+│  ● Live audio connected    [Mute]    │
 │                                      │
-│  Example P2_SCORE_P1 for Player 2:   │
-│  Player 1's answer:                  │
+│  YOUR TURN TO ANSWER                 │
+│  Speak your answer.                  │
 │  ┌────────────────────────────────┐  │
-│  │ Progress improves access…      │  │
+│  │       ANSWER COMPLETE          │  │
 │  └────────────────────────────────┘  │
-│  [1][2][3][4][5]                     │
-│  [6][7][8][9][10]                    │
-│  [        Submit score        ]      │
 │                                      │
-│  or waiting spinner / answer box /   │
-│  Accept score | Flag score           │
+│  (Other phases — examples)           │
+│  Listener: "Player 1 is answering…"  │
+│  Score: speaker finished answering;  │
+│         score 1–10 → Submit score    │
+│  Review: Accept score | Flag score   │
 └──────────────────────────────────────┘
 ```
 
 **Phases:** P1_ANSWER → P2_SCORE_P1 → P2_ANSWER → P1_SCORE_P2 → REVIEW  
-**Built behaviour:** poll match state every 1s; on `ENDED` → `/result/:id`.
+
+**Built behaviour:**
+
+- One LiveKit room for the match (`match-{matchId}`); not recreated per question  
+- Poll `GET /api/matches/:id` ~1s  
+- **Answer complete** → `POST .../answer-complete` (empty body; no spoken content uploaded)  
+- On `ENDED` → `/result/:id` (audio component unmounts / disconnects)
 
 ---
 
@@ -114,7 +117,8 @@ Matches the implemented React pages.
 │    [av]               [av]           │
 │                                      │
 │  Questions completed: 10 / 10        │
-│  Flags: 1                            │
+│  Neo score strikes: 1                │
+│  Alex score strikes: 0               │
 │  End reason: Completed               │
 │                                      │
 │  ┌────────────────────────────────┐  │
@@ -130,7 +134,7 @@ Matches the implemented React pages.
 ```
 
 **Built behaviour:**  
-- Play again → keep session → `/pool`  
+- Play again → keep session → `/pool` (new match + new LiveKit room)  
 - Reset / Exit → clear `sessionStorage` → `/`  
 
 ---
@@ -138,7 +142,7 @@ Matches the implemented React pages.
 ## User journey
 
 ```
-Welcome → Pool → Match (questions 1..10 or early THREE_FLAGS) → Result
-                 ↑______________________________________________|
-                              Play again
+Welcome → Pool → Match (live audio + spoken turns 1..10 or THREE_FLAGS) → Result
+                 ↑_______________________________________________________|
+                              Play again (new match / new room)
 ```

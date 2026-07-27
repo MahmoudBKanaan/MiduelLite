@@ -46,9 +46,15 @@ PostgreSQL Global Development Group. (n.d.). *PostgreSQL documentation*. https:/
 
 Docker Inc. (n.d.). *Docker Compose documentation*. https://docs.docker.com/compose/
 
+LiveKit. (n.d.). *LiveKit documentation*. https://docs.livekit.io/
+
+LiveKit. (n.d.). *Access tokens*. https://docs.livekit.io/home/server/generating-tokens/
+
+LiveKit. (n.d.). *JavaScript client SDK — connecting*. https://docs.livekit.io/home/client/connect/
+
 Kanaan, M. B. (2026). *Minduel Lite* [Computer software]. GitHub. https://github.com/MahmoudBKanaan/MiduelLite
 
-**Note:** Replace the author line with your full legal name if different. Year can match submission year.
+**Note:** LiveKit technical details (tokens, rooms, client connect) cite official LiveKit documentation. LiveKit is part of the **project’s defined solution**, not an IU examination requirement for audio.
 
 ---
 
@@ -59,6 +65,7 @@ Kanaan, M. B. (2026). *Minduel Lite* [Computer software]. GitHub. https://github
 | IU Task PDF | Defines Task 2 requirements | IU task (n.d.) |
 | IU Oral Report Guidelines | Structure, 15 min, PDF, evaluation weights | IU guidelines (n.d.) |
 | React / Express / PostgreSQL / Docker docs | Technology implementation references | Vendor docs (n.d.) |
+| LiveKit documentation | Access tokens, JS client connect, media rooms | LiveKit (n.d.) |
 | Own GitHub repo | Code artefact | Kanaan (2026) |
 
 Do **not** present vendor logos or screenshots from third-party sites without citing them. This deck does not include those.

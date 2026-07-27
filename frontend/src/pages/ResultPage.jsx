@@ -77,7 +77,7 @@ export default function ResultPage() {
 
   const endReasonLabel =
     result.endReason === 'THREE_FLAGS'
-      ? 'Ended after three flagged scores'
+      ? 'Ended after one player struck three received scores'
       : result.endReason === 'COMPLETED'
         ? 'Completed'
         : result.endReason || '—';
@@ -116,7 +116,12 @@ export default function ResultPage() {
 
       <div className="card">
         <p>Questions completed: {result.questionsCompleted} / 10</p>
-        <p>Flags: {result.flagCount}</p>
+        <p>
+          {result.player1.displayName} score strikes: {result.player1FlagCount}
+        </p>
+        <p>
+          {result.player2.displayName} score strikes: {result.player2FlagCount}
+        </p>
         <p>End reason: {endReasonLabel}</p>
 
         <button type="button" className="btn" onClick={onPlayAgain}>

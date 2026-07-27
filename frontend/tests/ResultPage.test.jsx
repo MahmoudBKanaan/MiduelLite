@@ -12,7 +12,8 @@ const getResult = vi.fn(async () => ({
   player2: { displayName: 'Alex', avatarId: 2, finalScore: 6.9 },
   winner: 'PLAYER_1',
   questionsCompleted: 10,
-  flagCount: 1,
+  player1FlagCount: 1,
+  player2FlagCount: 0,
   endReason: 'COMPLETED',
 }));
 
@@ -62,7 +63,8 @@ describe('ResultPage (items 107–115)', () => {
     expect(screen.getByText('7.8')).toBeInTheDocument();
     expect(screen.getByText('6.9')).toBeInTheDocument();
     expect(screen.getByText(/Questions completed: 10 \/ 10/i)).toBeInTheDocument();
-    expect(screen.getByText(/Flags: 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/Neo score strikes: 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/Alex score strikes: 0/i)).toBeInTheDocument();
     expect(screen.getByText(/End reason: Completed/i)).toBeInTheDocument();
     expect(screen.getByText(/Winner/i)).toBeInTheDocument();
   });

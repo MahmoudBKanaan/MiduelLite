@@ -193,10 +193,26 @@ export function getMatch(matchId) {
   return request(`/api/matches/${matchId}`);
 }
 
-export function submitAnswer(matchId, answer) {
-  return request(`/api/matches/${matchId}/answer`, {
+/**
+ * Mark spoken answer complete (no body — LiveKit audio only).
+ * Session headers X-Player-Id / X-Session-Token are attached by request().
+ */
+export function completeAnswer(matchId) {
+  return request(`/api/matches/${matchId}/answer-complete`, {
     method: 'POST',
-    body: JSON.stringify({ answer }),
+    body: '{}',
+  });
+}
+
+/**
+ * Request a LiveKit access token for the current match.
+ * Session headers X-Player-Id / X-Session-Token are attached by request().
+ * @returns {Promise<{ token: string, serverUrl: string }>}
+ */
+export function getAudioToken(matchId) {
+  return request(`/api/matches/${matchId}/audio-token`, {
+    method: 'POST',
+    body: '{}',
   });
 }
 

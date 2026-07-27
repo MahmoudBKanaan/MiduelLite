@@ -32,21 +32,25 @@ describe('parseReviewAction (item 58)', () => {
 });
 
 describe('resolveAfterBothReviews (item 61)', () => {
-  it('ends with THREE_FLAGS when flag_count >= 3', () => {
-    expect(resolveAfterBothReviews(3, 2)).toEqual({ type: 'THREE_FLAGS' });
-    expect(resolveAfterBothReviews(4, 10)).toEqual({ type: 'THREE_FLAGS' });
+  it('ends only when either one player has at least three flags', () => {
+    expect(resolveAfterBothReviews(3, 0, 2)).toEqual({ type: 'THREE_FLAGS' });
+    expect(resolveAfterBothReviews(1, 3, 10)).toEqual({ type: 'THREE_FLAGS' });
+    expect(resolveAfterBothReviews(2, 2, 2)).toEqual({
+      type: 'NEXT',
+      nextQuestion: 3,
+    });
   });
 
-  it('ends with COMPLETED on question 10 when flags < 3', () => {
-    expect(resolveAfterBothReviews(1, 10)).toEqual({ type: 'COMPLETED' });
+  it('ends with COMPLETED on question 10 when each player has fewer than 3', () => {
+    expect(resolveAfterBothReviews(2, 2, 10)).toEqual({ type: 'COMPLETED' });
   });
 
   it('advances to next question otherwise', () => {
-    expect(resolveAfterBothReviews(0, 1)).toEqual({
+    expect(resolveAfterBothReviews(0, 0, 1)).toEqual({
       type: 'NEXT',
       nextQuestion: 2,
     });
-    expect(resolveAfterBothReviews(2, 9)).toEqual({
+    expect(resolveAfterBothReviews(2, 1, 9)).toEqual({
       type: 'NEXT',
       nextQuestion: 10,
     });
@@ -83,17 +87,17 @@ async function startMatch() {
 /** Play through to REVIEW phase for current question. */
 async function reachReview(a, b, matchId) {
   await request(app)
-    .post(`/api/matches/${matchId}/answer`)
+    .post(`/api/matches/${matchId}/answer-complete`)
     .set(hdr(a))
-    .send({ answer: 'P1 answer text' });
+    .send({});
   await request(app)
     .post(`/api/matches/${matchId}/score`)
     .set(hdr(b))
     .send({ score: 7 });
   await request(app)
-    .post(`/api/matches/${matchId}/answer`)
+    .post(`/api/matches/${matchId}/answer-complete`)
     .set(hdr(b))
-    .send({ answer: 'P2 answer text' });
+    .send({});
   const scored = await request(app)
     .post(`/api/matches/${matchId}/score`)
     .set(hdr(a))
@@ -107,21 +111,21 @@ describe.skipIf(!hasDb)('review API (items 53–61)', () => {
     await resetMatchmakingState();
   });
 
-  it('items 53–55: score/answer transitions reach REVIEW', async () => {
+  it('items 53–55: score/answer-complete transitions reach REVIEW', async () => {
     const { a, b, matchId } = await startMatch();
     await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(a))
-      .send({ answer: 'A1' });
+      .send({});
     let s = await request(app)
       .post(`/api/matches/${matchId}/score`)
       .set(hdr(b))
       .send({ score: 8 });
     expect(s.body.phase).toBe('P2_ANSWER'); // 53
     s = await request(app)
-      .post(`/api/matches/${matchId}/answer`)
+      .post(`/api/matches/${matchId}/answer-complete`)
       .set(hdr(b))
-      .send({ answer: 'A2' });
+      .send({});
     expect(s.body.phase).toBe('P1_SCORE_P2'); // 54
     s = await request(app)
       .post(`/api/matches/${matchId}/score`)
@@ -144,17 +148,20 @@ describe.skipIf(!hasDb)('review API (items 53–61)', () => {
     expect(done.body.status).toBe('ACTIVE');
     expect(done.body.phase).toBe('P1_ANSWER');
     expect(done.body.currentQuestion).toBe(2);
-    expect(done.body.flagCount).toBe(0);
+    expect(done.body.player1FlagCount).toBe(0);
+    expect(done.body.player2FlagCount).toBe(0);
   });
 
-  it('FLAG increments flag_count; reviews are immutable', async () => {
+  it("FLAG increments only the reviewing player's count; reviews are immutable", async () => {
     const { a, b, matchId } = await startMatch();
     await reachReview(a, b, matchId);
     const flagged = await request(app)
       .post(`/api/matches/${matchId}/review`)
       .set(hdr(a))
       .send({ flag: true });
-    expect(flagged.body.flagCount).toBe(1);
+    expect(flagged.body.player1FlagCount).toBe(1);
+    expect(flagged.body.player2FlagCount).toBe(0);
+    expect(flagged.body.ownFlagCount).toBe(1);
     expect(flagged.body.ownReviewDone).toBe(true);
 
     const again = await request(app)
@@ -169,32 +176,60 @@ describe.skipIf(!hasDb)('review API (items 53–61)', () => {
       .send({ flag: false });
   });
 
-  it('third flag ends match with THREE_FLAGS', async () => {
+  it('mixed flags do not combine; one player’s third flag ends immediately', async () => {
     const { a, b, matchId } = await startMatch();
 
-    async function roundBothFlag() {
-      const st = await request(app)
-        .get(`/api/matches/${matchId}`)
-        .set(hdr(a));
-      if (st.body.status === 'ENDED') return st.body;
-      await reachReview(a, b, matchId);
+    // Round 1: one flag each. Combined total is 2, but neither player has 3.
+    await reachReview(a, b, matchId);
+    await request(app)
+      .post(`/api/matches/${matchId}/review`)
+      .set(hdr(a))
+      .send({ flag: true });
+    let body = (
       await request(app)
         .post(`/api/matches/${matchId}/review`)
-        .set(hdr(a))
-        .send({ flag: true });
-      const last = await request(app)
+        .set(hdr(b))
+        .send({ flag: true })
+    ).body;
+    expect(body.player1FlagCount).toBe(1);
+    expect(body.player2FlagCount).toBe(1);
+    expect(body.status).toBe('ACTIVE');
+    expect(body.currentQuestion).toBe(2);
+
+    // Round 2: one flag each again. Combined total is now 4; still no termination.
+    await reachReview(a, b, matchId);
+    await request(app)
+      .post(`/api/matches/${matchId}/review`)
+      .set(hdr(a))
+      .send({ flag: true });
+    body = (
+      await request(app)
         .post(`/api/matches/${matchId}/review`)
         .set(hdr(b))
-        .send({ flag: true });
-      return last.body;
-    }
+        .send({ flag: true })
+    ).body;
+    expect(body.player1FlagCount).toBe(2);
+    expect(body.player2FlagCount).toBe(2);
+    expect(body.status).toBe('ACTIVE');
+    expect(body.currentQuestion).toBe(3);
 
-    // Round 1: +2 flags
-    let body = await roundBothFlag();
-    expect(body.flagCount).toBeGreaterThanOrEqual(2);
-    // Round 2: +2 more → ends at >= 3 after second flag of this round
-    body = await roundBothFlag();
-    expect(body.status).toBe('ENDED');
-    expect(body.endReason).toBe('THREE_FLAGS');
+    // Round 3: P1's third personal flag ends immediately; P2 need not review.
+    await reachReview(a, b, matchId);
+    const third = await request(app)
+      .post(`/api/matches/${matchId}/review`)
+      .set(hdr(a))
+      .send({ flag: true });
+    expect(third.status).toBe(200);
+    expect(third.body.player1FlagCount).toBe(3);
+    expect(third.body.player2FlagCount).toBe(2);
+    expect(third.body.status).toBe('ENDED');
+    expect(third.body.endReason).toBe('THREE_FLAGS');
+
+    // Opponent cannot submit a fourth flag / remaining review
+    const blocked = await request(app)
+      .post(`/api/matches/${matchId}/review`)
+      .set(hdr(b))
+      .send({ flag: true });
+    expect(blocked.status).toBe(409);
   });
 });

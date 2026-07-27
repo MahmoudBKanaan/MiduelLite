@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS questions (
 -- -----------------------------------------------------------------------------
 -- matches — current and completed match state
 -- Fields: id, player1_id, player2_id, competition_id, current_question,
---         phase, status, flag_count, end_reason, created_at, ended_at
+--         phase, status, per-player flag counts, end_reason, created_at, ended_at
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS matches (
   id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -73,7 +73,8 @@ CREATE TABLE IF NOT EXISTS matches (
   current_question   SMALLINT NOT NULL DEFAULT 1,
   phase              VARCHAR(20) NOT NULL,
   status             VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-  flag_count         SMALLINT NOT NULL DEFAULT 0,
+  player1_flag_count SMALLINT NOT NULL DEFAULT 0,
+  player2_flag_count SMALLINT NOT NULL DEFAULT 0,
   end_reason         VARCHAR(20),
   created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ended_at           TIMESTAMPTZ,
@@ -98,25 +99,29 @@ CREATE TABLE IF NOT EXISTS matches (
       end_reason IS NULL
       OR end_reason IN ('COMPLETED', 'THREE_FLAGS')
     ),
-  CONSTRAINT matches_flag_count_non_negative
-    CHECK (flag_count >= 0)
+  CONSTRAINT matches_player1_flag_count_range
+    CHECK (player1_flag_count BETWEEN 0 AND 3),
+  CONSTRAINT matches_player2_flag_count_range
+    CHECK (player2_flag_count BETWEEN 0 AND 3)
 );
 
 -- -----------------------------------------------------------------------------
 -- match_rounds — one row per played question in a match
 -- Primary key: (match_id, question_number)
+-- Spoken answers are live via LiveKit only — never store answer text, audio,
+-- recordings, transcripts, or media URLs (KB V2.0).
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS match_rounds (
-  match_id                UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
-  question_number         SMALLINT NOT NULL,
-  player1_answer          TEXT,
-  player1_score           SMALLINT,
-  player1_score_flagged   BOOLEAN NOT NULL DEFAULT FALSE,
-  player1_reviewed        BOOLEAN NOT NULL DEFAULT FALSE,
-  player2_answer          TEXT,
-  player2_score           SMALLINT,
-  player2_score_flagged   BOOLEAN NOT NULL DEFAULT FALSE,
-  player2_reviewed        BOOLEAN NOT NULL DEFAULT FALSE,
+  match_id                   UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
+  question_number            SMALLINT NOT NULL,
+  player1_answer_completed   BOOLEAN NOT NULL DEFAULT FALSE,
+  player1_score              SMALLINT,
+  player1_score_flagged      BOOLEAN NOT NULL DEFAULT FALSE,
+  player1_reviewed           BOOLEAN NOT NULL DEFAULT FALSE,
+  player2_answer_completed   BOOLEAN NOT NULL DEFAULT FALSE,
+  player2_score              SMALLINT,
+  player2_score_flagged      BOOLEAN NOT NULL DEFAULT FALSE,
+  player2_reviewed           BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (match_id, question_number),
   CONSTRAINT match_rounds_question_number_range
     CHECK (question_number BETWEEN 1 AND 10),

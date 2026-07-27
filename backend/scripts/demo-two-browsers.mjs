@@ -89,13 +89,13 @@ async function main() {
   console.log('153. Same question:', stateA.questionText.slice(0, 70) + '...');
 
   // 154 full sequence
-  let s = await api(`/api/matches/${matchId}/answer`, {
+  let s = await api(`/api/matches/${matchId}/answer-complete`, {
     method: 'POST',
     player: playerA,
-    body: { answer: 'Demo P1: technology improves access to knowledge.' },
+    body: {},
   });
   assert(s.phase === 'P2_SCORE_P1', `phase ${s.phase}`);
-  console.log('154. P1 answered →', s.phase);
+  console.log('154. P1 answer-complete (spoken) →', s.phase);
 
   s = await api(`/api/matches/${matchId}/score`, {
     method: 'POST',
@@ -105,13 +105,13 @@ async function main() {
   assert(s.phase === 'P2_ANSWER', `phase ${s.phase}`);
   console.log('154. P2 scored →', s.phase);
 
-  s = await api(`/api/matches/${matchId}/answer`, {
+  s = await api(`/api/matches/${matchId}/answer-complete`, {
     method: 'POST',
     player: playerB,
-    body: { answer: 'Demo P2: progress needs ethical limits.' },
+    body: {},
   });
   assert(s.phase === 'P1_SCORE_P2', `phase ${s.phase}`);
-  console.log('154. P2 answered →', s.phase);
+  console.log('154. P2 answer-complete (spoken) →', s.phase);
 
   s = await api(`/api/matches/${matchId}/score`, {
     method: 'POST',

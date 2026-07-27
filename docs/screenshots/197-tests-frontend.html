@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/>
-<title>197 — Automated tests (FE + BE)</title>
+<title>211 — Frontend automated tests (V2)</title>
 <style>
   body { margin:0; font-family: Consolas, 'Courier New', monospace; background:#0f1419; color:#e8eef7; }
   header { padding:16px 20px; background:#1a2332; border-bottom:1px solid #334155; font-size:18px; font-weight:700; }
   pre { padding:20px; white-space:pre-wrap; word-break:break-word; font-size:12px; line-height:1.4; margin:0; }
 </style></head>
 <body>
-<header>197 — Automated tests (FE + BE)</header>
+<header>211 — Frontend automated tests (V2)</header>
 <pre>
 > minduel-lite-frontend@1.0.0 test
 > vitest run
@@ -30,37 +30,6 @@
       Tests  39 passed (39)
    Start at  19:53:12
    Duration  9.19s (transform 401ms, setup 1.81s, collect 2.55s, tests 3.56s, environment 11.29s, prepare 1.48s)
-
-
-
---- BACKEND ---
-
-
-> minduel-lite-backend@1.0.0 test
-> vitest run
-
-
- RUN  v2.1.9 D:/Documents/IU/MinduelLite/backend
-
- ✓ tests/core-mvp.test.js (17 tests) 2573ms
-   ✓ BT core — match rules > third-flag termination 1526ms
- ✓ tests/api.test.js (10 tests) 1009ms
-   ✓ Player and matchmaking (DB) > BT-10/11 flagging and third flag ends match 362ms
- ✓ tests/match-engine.test.js (12 tests) 1111ms
-   ✓ third flag from flag_count = 2 > when flag_count is 2, one player flag=true ends match immediately (THREE_FLAGS) 317ms
- ✓ tests/review.test.js (10 tests) 820ms
- ✓ tests/result.test.js (9 tests) 347ms
-   ✓ GET /api/matches/:matchId/result (items 68–69) > returns result payload after THREE_FLAGS end 341ms
- ✓ tests/audio-token.test.js (6 tests) 1046ms
- ✓ tests/matchmaking.test.js (13 tests) 446ms
- ✓ tests/security.test.js (11 tests) 150ms
- ✓ tests/players.test.js (12 tests) 142ms
- ✓ tests/foundation.test.js (3 tests) 58ms
-
- Test Files  10 passed (10)
-      Tests  103 passed (103)
-   Start at  19:53:23
-   Duration  19.68s (transform 187ms, setup 0ms, collect 7.68s, tests 7.70s, environment 5ms, prepare 1.73s)
 
 </pre>
 </body></html>

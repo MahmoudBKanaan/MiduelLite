@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>User flow & match state — Minduel Lite</title>
+  <title>User flow & match state — Minduel Lite V2</title>
   <style>
     body {
       margin: 0; min-height: 100vh; padding: 28px 32px;
@@ -17,60 +17,58 @@
     }
     .node {
       background: #1a2332; border: 1px solid #4f8cff; border-radius: 10px;
-      padding: 10px 14px; font-weight: 600; font-size: 14px;
+      padding: 10px 14px; font-weight: 600; font-size: 13px;
     }
     .node.end { border-color: #ff6b6b; color: #ffb4b4; }
     .node.ok { border-color: #3ecf8e; color: #9af0c7; }
+    .node.speak { border-color: #f59e0b; color: #fcd34d; }
     .arr { color: #9aabbf; font-size: 18px; }
-    .note { font-size: 13px; color: #9aabbf; line-height: 1.5; max-width: 900px; }
+    .note { font-size: 13px; color: #9aabbf; line-height: 1.5; max-width: 920px; }
     code { background: #243044; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
   </style>
 </head>
 <body>
   <h1>User flow & match state machine</h1>
-  <div class="sub">Minduel Lite — own diagram</div>
+  <div class="sub">Minduel Lite V2 — spoken answers · LiveKit room for whole match</div>
 
   <h2>Primary user flow</h2>
   <div class="flow">
     <div class="node">Welcome</div><div class="arr">→</div>
     <div class="node">Pool</div><div class="arr">→</div>
-    <div class="node">Match</div><div class="arr">→</div>
+    <div class="node">Match + LiveKit</div><div class="arr">→</div>
     <div class="node ok">Result</div>
   </div>
   <div class="note">
-    Play again → Pool (same session) · Reset / Exit → Welcome (clear sessionStorage)
+    Play again → Pool (new match + new room) · Reset / Exit → Welcome
   </div>
 
-  <h2>Match phases (each question)</h2>
+  <h2>Match phases (each question) — spoken wording</h2>
   <div class="phases">
-    <div class="node">P1_ANSWER</div><div class="arr">→</div>
-    <div class="node">P2_SCORE_P1</div><div class="arr">→</div>
-    <div class="node">P2_ANSWER</div><div class="arr">→</div>
-    <div class="node">P1_SCORE_P2</div><div class="arr">→</div>
+    <div class="node speak">P1 SPEAKS</div><div class="arr">→</div>
+    <div class="node">ANSWER COMPLETE</div><div class="arr">→</div>
+    <div class="node">P2 SCORES</div><div class="arr">→</div>
+    <div class="node speak">P2 SPEAKS</div><div class="arr">→</div>
+    <div class="node">ANSWER COMPLETE</div><div class="arr">→</div>
+    <div class="node">P1 SCORES</div><div class="arr">→</div>
     <div class="node">REVIEW</div>
   </div>
-
-  <h2>After both reviews</h2>
-  <div class="flow">
-    <div class="node">REVIEW done</div>
-    <div class="arr">→</div>
-    <div class="node end">flags ≥ 3 → THREE_FLAGS</div>
-  </div>
-  <div class="flow">
-    <div class="node">REVIEW done</div>
-    <div class="arr">→</div>
-    <div class="node end">question = 10 → COMPLETED</div>
-  </div>
-  <div class="flow">
-    <div class="node">REVIEW done</div>
-    <div class="arr">→</div>
-    <div class="node ok">else next question → P1_ANSWER</div>
-  </div>
-
-  <h2>Matchmaking</h2>
   <div class="note">
-    <code>similarity = sharedInterestCount / 3</code><br/>
-    Priority: 3 shared → 2 → 1 · zero shared = no match · earliest queue entry wins ties
+    API phases: <code>P1_ANSWER</code> → <code>P2_SCORE_P1</code> → <code>P2_ANSWER</code> → <code>P1_SCORE_P2</code> → <code>REVIEW</code><br/>
+    No answer text stored · either player's third personal FLAG ends immediately (THREE_FLAGS)
+  </div>
+
+  <h2>After reviews</h2>
+  <div class="flow">
+    <div class="node">P1 flags ≥ 3 OR P2 flags ≥ 3</div><div class="arr">→</div>
+    <div class="node end">ENDED · THREE_FLAGS</div>
+  </div>
+  <div class="flow">
+    <div class="node">question = 10</div><div class="arr">→</div>
+    <div class="node end">ENDED · COMPLETED</div>
+  </div>
+  <div class="flow">
+    <div class="node">else</div><div class="arr">→</div>
+    <div class="node ok">next question · P1 SPEAKS</div>
   </div>
 </body>
 </html>
