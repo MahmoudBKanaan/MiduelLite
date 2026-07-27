@@ -47,3 +47,8 @@ temp/
 * - Copy.*
 *Copy.docx
 ~$*.docx
+
+# IU assignment PDFs in repo root (local only; not part of the app)
+/Academic Work.pdf
+/Guideline_Oral Project Report.pdf
+/Task_Oral_Project_Report_DLBSEPPSD01_E.pdf
