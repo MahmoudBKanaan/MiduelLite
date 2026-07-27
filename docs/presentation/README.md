@@ -10,27 +10,24 @@
 **Rebuild:** from repo root, with `pptxgenjs` available:  
 `node docs/presentation/build-presentation.mjs`
 
-### Slide sequence
+### Slide sequence (process-focused)
 
-1. Title + GitHub link  
-2. Outline  
-3. Problem and objective  
-4. Target user and benefit  
-5. MVP requirements and scope  
-6. Development process (+ Kanban image)  
-7. Wireframes / user journey (screenshots)  
-8. Architecture (C4)  
-9. Database (ER)  
-10. Matchmaking algorithm  
-11. Match state machine / code  
-12. Testing + Docker  
-13. Operational result  
-14. Goal achievement + limitations  
-15. Reflection + future improvements  
-16. Conclusion  
-17. List of figures & bibliography  
+1. **Title + GitHub link** (prominent)  
+2. Outline — task / planning / architecture / result / testing / reflection  
+3–5. Task definition (problem, users, scope)  
+6. Planning & process (Kanban)  
+7. User journey as planning artefact (not a UI tour)  
+8–10. Architecture (C4, ER, matchmaking)  
+11. Implementation (state machine)  
+12–13. Testing, Docker, operational result  
+14–15. Evaluation & reflection  
+16. Conclusion + GitHub  
+17. **List of figures** (own work labelled)  
+18. **Bibliography** (APA-style external sources)  
 
-**Before recording:** replace “Student name / matriculation number” on the title slide.
+**Academic pack:** [academic-citations.md](./academic-citations.md) — figures table, APA refs, speaking focus.  
+
+**Before recording:** replace student name / matriculation number on the title slide.
 
 ## Supporting materials
 
