@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>User flow & match state — Minduel Lite</title>
+  <style>
+    body {
+      margin: 0; min-height: 100vh; padding: 28px 32px;
+      font-family: system-ui, Segoe UI, sans-serif;
+      background: #0b1220; color: #e8eef7;
+    }
+    h1 { margin: 0 0 6px; font-size: 22px; }
+    h2 { margin: 24px 0 12px; font-size: 16px; color: #4f8cff; }
+    .sub { color: #9aabbf; margin-bottom: 8px; font-size: 14px; }
+    .flow, .phases {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 8px;
+    }
+    .node {
+      background: #1a2332; border: 1px solid #4f8cff; border-radius: 10px;
+      padding: 10px 14px; font-weight: 600; font-size: 14px;
+    }
+    .node.end { border-color: #ff6b6b; color: #ffb4b4; }
+    .node.ok { border-color: #3ecf8e; color: #9af0c7; }
+    .arr { color: #9aabbf; font-size: 18px; }
+    .note { font-size: 13px; color: #9aabbf; line-height: 1.5; max-width: 900px; }
+    code { background: #243044; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>User flow & match state machine</h1>
+  <div class="sub">Minduel Lite — own diagram</div>
+
+  <h2>Primary user flow</h2>
+  <div class="flow">
+    <div class="node">Welcome</div><div class="arr">→</div>
+    <div class="node">Pool</div><div class="arr">→</div>
+    <div class="node">Match</div><div class="arr">→</div>
+    <div class="node ok">Result</div>
+  </div>
+  <div class="note">
+    Play again → Pool (same session) · Reset / Exit → Welcome (clear sessionStorage)
+  </div>
+
+  <h2>Match phases (each question)</h2>
+  <div class="phases">
+    <div class="node">P1_ANSWER</div><div class="arr">→</div>
+    <div class="node">P2_SCORE_P1</div><div class="arr">→</div>
+    <div class="node">P2_ANSWER</div><div class="arr">→</div>
+    <div class="node">P1_SCORE_P2</div><div class="arr">→</div>
+    <div class="node">REVIEW</div>
+  </div>
+
+  <h2>After both reviews</h2>
+  <div class="flow">
+    <div class="node">REVIEW done</div>
+    <div class="arr">→</div>
+    <div class="node end">flags ≥ 3 → THREE_FLAGS</div>
+  </div>
+  <div class="flow">
+    <div class="node">REVIEW done</div>
+    <div class="arr">→</div>
+    <div class="node end">question = 10 → COMPLETED</div>
+  </div>
+  <div class="flow">
+    <div class="node">REVIEW done</div>
+    <div class="arr">→</div>
+    <div class="node ok">else next question → P1_ANSWER</div>
+  </div>
+
+  <h2>Matchmaking</h2>
+  <div class="note">
+    <code>similarity = sharedInterestCount / 3</code><br/>
+    Priority: 3 shared → 2 → 1 · zero shared = no match · earliest queue entry wins ties
+  </div>
+</body>
+</html>

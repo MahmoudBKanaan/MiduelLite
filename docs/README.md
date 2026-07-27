@@ -15,5 +15,6 @@
 
 Project root: repository folder containing `docker-compose.yml` and `README.md`.
 
-| [screenshots/](./screenshots/README.md) | Presentation screenshots (192–198) |
+| [screenshots/](./screenshots/README.md) | Presentation screenshots (192–201) |
+| [presentation/](./presentation/README.md) | Diagrams + code excerpts for oral report |
 

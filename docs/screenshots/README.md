@@ -13,3 +13,13 @@ Captured for oral project report items 192–198.
 | 198 | [198-docker.png](./198-docker.png) | Docker containers running |
 
 Also HTML sources: `196-kanban.html`, `197-tests.html`, `198-docker.html`.
+
+## Diagrams for slides (199–201)
+
+| # | File | Description |
+|---|------|-------------|
+| 199 | [199-c4.png](./199-c4.png) | C4 container architecture |
+| 200 | [200-er.png](./200-er.png) | ER / data model |
+| 201 | [201-state.png](./201-state.png) | User flow + match state machine |
+
+Code excerpts (202): [../presentation/code-excerpts.md](../presentation/code-excerpts.md)

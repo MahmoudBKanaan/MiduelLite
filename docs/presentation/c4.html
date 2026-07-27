@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>C4 Container — Minduel Lite</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, Segoe UI, sans-serif;
+      background: #0b1220;
+      color: #e8eef7;
+      padding: 32px;
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; font-weight: 700; }
+    .sub { color: #9aabbf; margin-bottom: 28px; font-size: 14px; }
+    .stack { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .box {
+      width: 420px;
+      border: 2px solid #4f8cff;
+      border-radius: 12px;
+      background: #1a2332;
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .box.user { border-color: #3ecf8e; }
+    .box.db { border-color: #a78bfa; }
+    .title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .meta { font-size: 13px; color: #9aabbf; line-height: 1.4; }
+    .arrow {
+      color: #4f8cff;
+      font-size: 22px;
+      padding: 6px 0;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .arrow span { display: block; font-size: 12px; color: #9aabbf; }
+    .label { margin-top: 24px; font-size: 12px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <h1>C4 Container Architecture</h1>
+  <div class="sub">Minduel Lite — own diagram for IU oral project report</div>
+  <div class="stack">
+    <div class="box user">
+      <div class="title">Person: User</div>
+      <div class="meta">Web browser (Chrome / Incognito)</div>
+    </div>
+    <div class="arrow">▼<span>HTTP · localhost:5173</span></div>
+    <div class="box">
+      <div class="title">Container: React SPA</div>
+      <div class="meta">Vite · 4 screens · sessionStorage<br/>poll API ≈ 1 second</div>
+    </div>
+    <div class="arrow">▼<span>REST/JSON · X-Player-Id · X-Session-Token</span></div>
+    <div class="box">
+      <div class="title">Container: Node.js / Express</div>
+      <div class="meta">port 3001 · matchmaking · match engine<br/>validation · Helmet · CORS</div>
+    </div>
+    <div class="arrow">▼<span>Parameterized SQL · DATABASE_URL</span></div>
+    <div class="box db">
+      <div class="title">Container: PostgreSQL</div>
+      <div class="meta">5 tables · 1000 seeded questions<br/>schema.sql + seed.sql on first volume</div>
+    </div>
+  </div>
+  <div class="label">Docker Compose: frontend · backend · database</div>
+</body>
+</html>

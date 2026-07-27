@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ER Diagram — Minduel Lite</title>
+  <style>
+    body {
+      margin: 0; min-height: 100vh; padding: 28px;
+      font-family: system-ui, Segoe UI, sans-serif;
+      background: #0b1220; color: #e8eef7;
+    }
+    h1 { margin: 0 0 6px; font-size: 22px; }
+    .sub { color: #9aabbf; margin-bottom: 22px; font-size: 14px; }
+    .row { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; }
+    .card {
+      background: #1a2332; border: 1px solid #4f8cff; border-radius: 10px;
+      padding: 12px 14px; min-width: 200px; font-size: 13px;
+    }
+    .card h2 { margin: 0 0 8px; font-size: 15px; color: #4f8cff; }
+    .card ul { margin: 0; padding-left: 16px; line-height: 1.45; color: #c9d4e3; }
+    .pk { color: #3ecf8e; }
+    .links { margin-top: 22px; text-align: center; font-size: 13px; color: #9aabbf; line-height: 1.6; }
+    code { color: #e8eef7; }
+  </style>
+</head>
+<body>
+  <h1>Entity-Relationship Model</h1>
+  <div class="sub">PostgreSQL — five tables (own diagram)</div>
+  <div class="row">
+    <div class="card">
+      <h2>players</h2>
+      <ul>
+        <li><span class="pk">id</span> PK UUID</li>
+        <li>session_token</li>
+        <li>display_name</li>
+        <li>avatar_id (1–12)</li>
+        <li>interests[3]</li>
+        <li>created_at</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>queue_entries</h2>
+      <ul>
+        <li><span class="pk">player_id</span> PK/FK</li>
+        <li>joined_at</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>questions</h2>
+      <ul>
+        <li><span class="pk">competition_id</span></li>
+        <li><span class="pk">question_number</span></li>
+        <li>question_text</li>
+        <li>100 × 10 = 1000 rows</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>matches</h2>
+      <ul>
+        <li><span class="pk">id</span> PK</li>
+        <li>player1_id, player2_id</li>
+        <li>competition_id</li>
+        <li>current_question, phase</li>
+        <li>status, flag_count</li>
+        <li>end_reason</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>match_rounds</h2>
+      <ul>
+        <li><span class="pk">match_id + question_number</span></li>
+        <li>player1/2_answer</li>
+        <li>player1/2_score</li>
+        <li>flagged / reviewed flags</li>
+      </ul>
+    </div>
+  </div>
+  <div class="links">
+    players 1 — 0..1 queue_entries<br/>
+    players 1 — * matches (as P1 or P2)<br/>
+    matches 1 — 1..10 match_rounds<br/>
+    questions referenced by competition_id + question_number
+  </div>
+</body>
+</html>
