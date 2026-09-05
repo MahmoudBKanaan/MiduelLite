@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { avatarSrc } from '../components/AvatarPicker.jsx';
+import BrandBar from '../components/BrandBar.jsx';
 import {
   formatUserError,
   getConfig,
@@ -125,31 +126,27 @@ export default function PoolPage() {
   };
 
   return (
-    <div>
-      <div className="card waiting">
-        <img
-          src={avatarSrc(avatarId)}
-          alt=""
-          width={72}
-          height={72}
-          style={{ borderRadius: 16 }}
-        />
-        <h2 style={{ marginTop: '0.75rem' }}>{displayName}</h2>
-        <ul className="pool-interests">
-          {(interestLabels.length
-            ? interestLabels
-            : interestIds.map(String)
-          ).map((label) => (
-            <li key={label}>{label}</li>
-          ))}
-        </ul>
-        <div className="spinner" aria-hidden="true" />
-        <p>Searching for opponent...</p>
-        {error && <p className="error">{error}</p>}
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
+    <div className="page-narrow pool-page">
+      <BrandBar status="Matchmaking active" />
+      <main className="card pool-card">
+        <div className="waiting-content">
+          <div className="pool-avatar-wrap">
+            <img className="pool-avatar" src={avatarSrc(avatarId)} alt="" width={132} height={132} />
+          </div>
+          <span className="eyebrow">You&apos;re in the pool</span>
+          <h1>{displayName}</h1>
+          <p className="pool-state">We&apos;re finding someone who shares your spark.</p>
+          <ul className="pool-interests">
+            {(interestLabels.length ? interestLabels : interestIds.map(String)).map((label) => (
+              <li key={label}>{label}</li>
+            ))}
+          </ul>
+          <div className="search-visual" aria-hidden="true"><span /><span /><span /></div>
+          <p>Searching for opponent...</p>
+          {error && <p className="error">{error}</p>}
+          <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel search</button>
+        </div>
+      </main>
     </div>
   );
 }

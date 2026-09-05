@@ -106,6 +106,7 @@ Example `.env` (values are placeholders):
 # LIVEKIT_API_SECRET=your_api_secret
 
 # Local open-source LiveKit (--profile local-audio):
+COMPOSE_PROFILES=local-audio
 LIVEKIT_URL=ws://localhost:7880
 LIVEKIT_API_KEY=devkey
 LIVEKIT_API_SECRET=secret

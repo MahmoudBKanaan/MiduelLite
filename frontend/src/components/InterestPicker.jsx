@@ -16,9 +16,6 @@ export default function InterestPicker({ interests, selected, onChange }) {
 
   return (
     <>
-      <div className="selection-count" aria-live="polite">
-        Selected {selected.length} / 3
-      </div>
       <div className="interest-grid" role="group" aria-label="Interests">
         {interests.map((item) => {
           const isSelected = selected.includes(item.id);
@@ -32,11 +29,13 @@ export default function InterestPicker({ interests, selected, onChange }) {
               onClick={() => toggle(item.id)}
               aria-pressed={isSelected}
             >
+              {isSelected && <span className="chip-check" aria-hidden="true">✓</span>}
               {item.name}
             </button>
           );
         })}
       </div>
+      <span className="sr-only" aria-live="polite">Selected {selected.length} / 3</span>
     </>
   );
 }

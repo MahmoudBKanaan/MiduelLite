@@ -269,7 +269,9 @@ export default function MatchAudio({ matchId, onAudioConnectedChange }) {
       <div ref={remoteAudioRootRef} className="match-audio-remote" hidden />
 
       {audioState === 'CONNECTING' && (
-        <p className="audio-status audio-status--connecting">Connecting audio...</p>
+        <div className="audio-bar">
+          <p className="audio-status audio-status--connecting">Connecting audio...</p>
+        </div>
       )}
 
       {audioState === 'CONNECTED' && (
@@ -300,7 +302,7 @@ export default function MatchAudio({ matchId, onAudioConnectedChange }) {
 
       {audioState === 'FAILED' && (
         <div className="audio-bar">
-          <p className="error audio-status" role="alert">
+          <p className="audio-status" role="alert">
             Audio connection unavailable.
           </p>
           {failReason ? (

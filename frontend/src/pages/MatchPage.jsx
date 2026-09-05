@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { avatarSrc } from '../components/AvatarPicker.jsx';
 import MatchAudio from '../components/MatchAudio.jsx';
 import ScorePicker from '../components/ScorePicker.jsx';
+import BrandBar from '../components/BrandBar.jsx';
 import {
   clearSession,
   formatUserError,
@@ -155,7 +156,7 @@ export default function MatchPage() {
   };
 
   const waitingMessage = (text) => (
-    <div className="waiting">
+    <div className="waiting turn-panel">
       <div className="spinner" aria-hidden="true" />
       <p>{text}</p>
     </div>
@@ -166,7 +167,7 @@ export default function MatchPage() {
    * ANSWER COMPLETE enabled only when role+phase correct, audio connected, not busy.
    */
   const answerCompletePanel = (opponentDisplayName, canComplete) => (
-    <div className="answer-turn">
+    <div className="answer-turn turn-panel">
       <h2 className="turn-title">YOUR TURN TO ANSWER</h2>
       <p className="muted-hint">
         Speak your answer to {opponentDisplayName}.
@@ -192,14 +193,13 @@ export default function MatchPage() {
    * ScorePicker 1–10 + Submit score unchanged; no audio logic here.
    */
   const scoreForm = (speakerDisplayName) => (
-    <div className="score-turn">
+    <div className="score-turn turn-panel">
       <p className="muted-hint">
         {speakerDisplayName} finished answering.
       </p>
       <p className="muted-hint">
         How would you score their spoken answer?
       </p>
-      <label>Score (1–10)</label>
       <ScorePicker value={score} onChange={setScore} />
       <button
         type="button"
@@ -234,14 +234,16 @@ export default function MatchPage() {
     showP2AnswerForm && audioConnected && !busy;
 
   return (
-    <div>
+    <div className="match-page">
+      <BrandBar status="Round in progress" />
       <div className="match-top-bar">
+        <span className="match-round-label">Live intellectual duel</span>
         <button
           type="button"
           className="btn btn-secondary btn-sm"
           onClick={onExitMatch}
         >
-          Exit match
+          <span aria-hidden="true">×</span> Exit match
         </button>
       </div>
 
@@ -276,10 +278,11 @@ export default function MatchPage() {
                 height={40}
               />
               <div>
-                Player 1: {state.player1.displayName}
-                {isP1 ? ' (you)' : ''}
+                <div className="player-name">{state.player1.displayName}</div>
+                <div className="player-role">Player 1{isP1 ? ' · You' : ''}</div>
               </div>
             </div>
+            <div className="versus-badge" aria-hidden="true">VS</div>
             <div className="player-pill">
               <img
                 src={avatarSrc(state.player2.avatarId)}
@@ -288,18 +291,22 @@ export default function MatchPage() {
                 height={40}
               />
               <div>
-                Player 2: {state.player2.displayName}
-                {isP2 ? ' (you)' : ''}
+                <div className="player-name">{state.player2.displayName}</div>
+                <div className="player-role">Player 2{isP2 ? ' · You' : ''}</div>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card match-card">
             <div className="meta">
               <span>Question {state.currentQuestion} / 10</span>
               <span>Your score strikes: {state.ownFlagCount} / 3</span>
             </div>
+            <div className="progress-track" aria-hidden="true">
+              <div className="progress-fill" style={{ width: `${Math.max(10, state.currentQuestion * 10)}%` }} />
+            </div>
 
+            <p className="question-label">Your prompt</p>
             <p className="question">{state.questionText}</p>
 
             {/* P1_ANSWER */}
@@ -330,9 +337,9 @@ export default function MatchPage() {
 
             {/* REVIEW — score received + ACCEPT / FLAG only; no audio-specific logic */}
             {showReviewForm && (
-              <>
-                <label>Score you received</label>
-                <div className="result-score">{state.ownReceivedScore}</div>
+              <div className="turn-panel">
+                <p className="turn-title">Your answer was scored</p>
+                <div className="review-score">{state.ownReceivedScore}</div>
                 <div className="stack-gap">
                   <button
                     type="button"
@@ -351,7 +358,7 @@ export default function MatchPage() {
                     Flag score
                   </button>
                 </div>
-              </>
+              </div>
             )}
             {showReviewWait &&
               waitingMessage(

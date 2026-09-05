@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AvatarPicker from '../components/AvatarPicker.jsx';
 import InterestPicker from '../components/InterestPicker.jsx';
+import BrandBar from '../components/BrandBar.jsx';
 import { createPlayer, formatUserError, getConfig, saveSession } from '../api/api.js';
 
 /**
@@ -63,50 +64,79 @@ export default function WelcomePage() {
   };
 
   return (
-    <div>
-      <h1>Minduel Lite</h1>
-      <p className="subtitle">Anonymous two-player intellectual competition</p>
+    <div className="welcome-page">
+      <BrandBar />
+      <main className="welcome-layout">
+        <section className="welcome-hero">
+          <span className="eyebrow">Ready when you are</span>
+          <h1>Think fast. Speak boldly.</h1>
+          <p className="subtitle">A lively one-on-one arena where sharp minds meet, ideas spark, and every answer counts.</p>
+          <div className="hero-features">
+            <div className="hero-feature"><span className="hero-feature-icon">✦</span><span>Ten questions. One brilliant duel.</span></div>
+            <div className="hero-feature"><span className="hero-feature-icon">◉</span><span>Live voice—human, spontaneous, real.</span></div>
+            <div className="hero-feature"><span className="hero-feature-icon">↗</span><span>Matched by the things you care about.</span></div>
+          </div>
+        </section>
 
-      <div className="card">
-        <label htmlFor="displayName">Display name</label>
-        <input
-          id="displayName"
-          name="displayName"
-          type="text"
-          maxLength={20}
-          autoComplete="off"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="2–20 characters"
-        />
+        <section className="card profile-card">
+          <div className="profile-heading">
+            <div>
+              <h2>Create your player</h2>
+              <p className="subtitle">No account needed. Just bring your curiosity.</p>
+            </div>
+            <span className="step-chip">3 quick picks</span>
+          </div>
+
+          <div className="form-section">
+            <label className="sr-only" htmlFor="displayName">Display name</label>
+            <div className="field-shell">
+              <span className="field-icon" aria-hidden="true">✎</span>
+              <input
+                id="displayName"
+                name="displayName"
+                type="text"
+                maxLength={20}
+                autoComplete="off"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Choose a display name"
+              />
+              <span className="field-count">{displayName.length}/20</span>
+            </div>
+          </div>
         {displayName.length > 0 && !nameValid && (
           <p className="error">Name must be 2–20 characters after trimming.</p>
         )}
 
-        <label>Avatar (choose one of 12)</label>
-        <AvatarPicker value={avatarId} onChange={setAvatarId} />
-        {!avatarValid && (
-          <p className="selection-count">Select one avatar to continue.</p>
-        )}
+          <div className="form-section">
+            <div className="section-heading">
+              <h3>Choose your character</h3>
+              <span className="section-helper">{avatarValid ? 'Looking good!' : 'Pick one'}</span>
+            </div>
+            <AvatarPicker value={avatarId} onChange={setAvatarId} />
+          </div>
 
-        <label>Choose exactly 3 interests</label>
-        <InterestPicker
-          interests={interests}
-          selected={interestIds}
-          onChange={setInterestIds}
-        />
+          <div className="form-section">
+            <div className="section-heading">
+              <h3>What lights you up?</h3>
+              <span className="selection-count">{interestIds.length} of 3</span>
+            </div>
+            <InterestPicker interests={interests} selected={interestIds} onChange={setInterestIds} />
+          </div>
 
         {error && <p className="error">{error}</p>}
 
         <button
           type="button"
           className="btn"
+          aria-label="Enter pool"
           disabled={!canEnterPool}
           onClick={onEnterPool}
         >
-          {loading ? 'Creating…' : 'Enter pool'}
+          {loading ? 'Getting things ready…' : <>Find my match <span className="btn-icon" aria-hidden="true">→</span></>}
         </button>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

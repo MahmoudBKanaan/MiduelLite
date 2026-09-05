@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { avatarSrc } from '../components/AvatarPicker.jsx';
+import BrandBar from '../components/BrandBar.jsx';
 import { clearSession, formatUserError, getResult } from '../api/api.js';
 import {
   handleAuthFailure,
@@ -83,15 +84,20 @@ export default function ResultPage() {
         : result.endReason || '—';
 
   return (
-    <div>
-      <h1>Match complete</h1>
+    <div className="result-page">
+      <BrandBar status="Duel complete" />
+      <div className="result-heading">
+        <span className="eyebrow">That was a great match</span>
+        <h1>Match complete</h1>
+        <p className="subtitle">Ideas were shared, scores are in, and one sharp mind came out ahead.</p>
+      </div>
 
       <div className="winner-banner">
         <span>{isDraw ? 'Result' : 'Winner'}</span>
         <strong>{winnerLabel}</strong>
       </div>
 
-      <div className="players-row">
+      <div className="players-row result-players">
         <div className="player-pill">
           <img
             src={avatarSrc(result.player1.avatarId)}
@@ -99,7 +105,7 @@ export default function ResultPage() {
             width={40}
             height={40}
           />
-          <div>{result.player1.displayName}</div>
+          <div className="player-name">{result.player1.displayName}</div>
           <div className="result-score">{result.player1.finalScore}</div>
         </div>
         <div className="player-pill">
@@ -109,30 +115,23 @@ export default function ResultPage() {
             width={40}
             height={40}
           />
-          <div>{result.player2.displayName}</div>
+          <div className="player-name">{result.player2.displayName}</div>
           <div className="result-score">{result.player2.finalScore}</div>
         </div>
       </div>
 
       <div className="card">
-        <p>Questions completed: {result.questionsCompleted} / 10</p>
-        <p>
-          {result.player1.displayName} score strikes: {result.player1FlagCount}
-        </p>
-        <p>
-          {result.player2.displayName} score strikes: {result.player2FlagCount}
-        </p>
-        <p>End reason: {endReasonLabel}</p>
-
-        <button type="button" className="btn" onClick={onPlayAgain}>
-          Play again
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={onResetProfile}>
-          Reset profile
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={onExit}>
-          Exit
-        </button>
+        <div className="result-stats">
+          <div className="result-stat"><strong>{result.questionsCompleted}/10</strong><span>Questions completed: {result.questionsCompleted} / 10</span></div>
+          <div className="result-stat"><strong>{result.player1FlagCount}</strong><span>{result.player1.displayName} score strikes: {result.player1FlagCount}</span></div>
+          <div className="result-stat"><strong>{result.player2FlagCount}</strong><span>{result.player2.displayName} score strikes: {result.player2FlagCount}</span></div>
+        </div>
+        <p className="subtitle">End reason: {endReasonLabel}</p>
+        <div className="result-actions">
+          <button type="button" className="btn" onClick={onPlayAgain}>Play again <span aria-hidden="true">↻</span></button>
+          <button type="button" className="btn btn-secondary" onClick={onResetProfile}>Reset profile</button>
+          <button type="button" className="btn btn-secondary" onClick={onExit}>Exit</button>
+        </div>
       </div>
     </div>
   );
